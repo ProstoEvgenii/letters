@@ -21,52 +21,75 @@ type Data struct {
 }
 
 func main() {
-	// var files []Data{} ///Создать массив с файлами котторые должны находится в папке с .exe перебрать его циклом и вывести ошибку если какой-то из файлов отсутствуют
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		fmt.Printf("Файл %s не найден в корне проекта.\n", filePath)
-	} else {
-		fmt.Printf("Файл %s найден в корне проекта.\n", filePath)
-	}
-
-	if err := godotenv.Load(".env"); err != nil {
-		log.Println("Файл .env не найден")
-		time.Sleep(10 * time.Second)
-		log.Fatal(err)
-	}
+	files_name := []string{"index.html", ".env", "users.json"}
+	CheckFilesAndConnectToEmail(files_name)
 
 	file, err := os.Open("users.json")
 	if err != nil {
 		fmt.Println("Не найден файл БД users.json")
 		time.Sleep(10 * time.Second)
-		log.Fatal(err)
+		log.Fatal()
 	}
 	defer file.Close()
 
-	d := gomail.NewDialer("smtp.yandex.ru", 465, "support@crypto-emergency.com", os.Getenv("EMAIL_PASS"))
-	if err := d.DialAndSend(); err != nil {
-		log.Printf("Не удалось отправить установить соединение с почтовым ящиком. Убедитесь ,что E-mail и пароль в файле .env указаны верно \n%v", err)
-		time.Sleep(10 * time.Second)
-		log.Fatal(err)
-	} else {
-		log.Println("Соединение с почтовым ящиком установлено.")
-	}
 	var records []Data
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&records)
 	if err != nil {
-		fmt.Println("Ошибка при декодировании JSON:", err)
-		return
+		if err.Error() == "EOF" && len(records) == 0 {
+			fmt.Println("Файл users.json пуст")
+			time.Sleep(10 * time.Second)
+			log.Fatal()
+		} else {
+			fmt.Println("Убедитесь, что вы используете верную базу данных", err)
+			time.Sleep(10 * time.Second)
+			log.Fatal()
+		}
 	}
 
 	todayMonthDate := time.Now().Format("01/02")
+	foundBirthday := false
 	for _, item := range records {
 		if item.Date_birth[:5] == todayMonthDate {
 			checkAndLog(item)
+			foundBirthday = true
 		}
 	}
-}
 
+	if !foundBirthday {
+		log.Println("Сегодня нет дней рождений среди пользователей.")
+		time.Sleep(10 * time.Second)
+		log.Fatal()
+	}
+}
+func CheckFilesAndConnectToEmail(files_name []string) {
+	fmt.Println("Проверяю файлы в папке...")
+	for _, item := range files_name {
+		if _, err := os.Stat(item); os.IsNotExist(err) {
+			fmt.Printf("Файл %s не найден в корне проекта.\n", item)
+			time.Sleep(10 * time.Second)
+			log.Fatal()
+		}
+	}
+	log.Println("Все файлы на присутствуют.")
+
+	if err := godotenv.Load(".env"); err != nil {
+		log.Println("Файл .env не найден")
+		time.Sleep(10 * time.Second)
+		log.Fatal()
+	}
+
+	// d := gomail.NewDialer("smtp.yandex.ru", 465, "support@crypto-emergency.com", os.Getenv("EMAIL_PASS"))
+	// if err := d.DialAndSend(); err != nil {
+	// 	log.Printf("Не удалось отправить установить соединение с почтовым ящиком. Убедитесь ,что E-mail и пароль в файле .env указаны верно \n%v", err)
+	// 	time.Sleep(10 * time.Second)
+	// 	log.Fatal(err)
+	// } else {
+	// 	log.Println("Соединение с почтовым ящиком установлено.")
+	// }
+}
 func checkAndLog(item Data) {
+	log.Println("=1854d3=", item)
 	log_name := time.Now().Format("01.02.2006")
 
 	existingLogs, err := os.Open("./logs/" + log_name + ".json")
@@ -116,9 +139,13 @@ func create_log(item Data) {
 	newLog := []Data{item} //Форматирую item в Json
 	logJson, err := json.Marshal(newLog)
 	if err != nil {
-		log.Println("=Ошибка форматирования лога в json=", err)
+
+		// log.Fatal("=Ошибка форматирования лога в json=", err)
 	}
 
+	if err := os.MkdirAll("./logs", os.ModePerm); err != nil {
+		log.Fatal("Ошибка при создании директории logs:", err)
+	}
 	newLogs, err := os.Create("./logs/" + log_name + ".json")
 	if err != nil {
 		fmt.Println("Unable to create file:", err)
@@ -410,7 +437,15 @@ func SendEmailReg(item Data) {
 	last_name := item.Last_name
 
 	replacer := strings.NewReplacer("${first_name}", first_name, "${last_name}", last_name)
-	html := replacer.Replace(confirmEmail)
+
+	htmlBytes, err := os.ReadFile("index.html")
+	if err != nil {
+		fmt.Println("Ошибка при чтении файла index.html:", err)
+		return
+	}
+	html := string(htmlBytes)
+	html = replacer.Replace(html)
+	log.Println("=fba203=", html)
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", "support@crypto-emergency.com")
