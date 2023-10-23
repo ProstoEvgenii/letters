@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -22,7 +23,9 @@ type Data struct {
 
 func main() {
 	files_name := []string{"index.html", ".env", "users.json"}
+
 	CheckFilesAndConnectToEmail(files_name)
+
 	records := readJson("users.json")
 	todayMonthDate := time.Now().Format("01/02")
 	foundBirthday := false
@@ -39,6 +42,7 @@ func main() {
 		log.Fatal()
 	}
 }
+
 func CheckFilesAndConnectToEmail(files_name []string) {
 	fmt.Println("Проверяю файлы в папке...")
 
@@ -184,6 +188,15 @@ func SendEmailReg(item Data) {
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/html", html)
 
+	// html = strings.ReplaceAll(html, "${s_uvazheniem_glava_munici.png}", s_uvazheniem_glava_munici)
+	// html = strings.ReplaceAll(html, "${image2}", image2)
+	// html = strings.ReplaceAll(html, "${image3}", image3)
+	m.Embed("./images/")
+	m.Embed("image1.png")
+	m.Embed("image2.png", "/images/img_4424.png")
+
+	related.Embed("image1", "https://example.com/image1.jpg")
+
 	d := gomail.NewDialer("smtp.yandex.ru", 465, "support@crypto-emergency.com", os.Getenv("EMAIL_PASS"))
 	if err := d.DialAndSend(m); err != nil {
 		// log.Println("Error SendEmailReg", err)
@@ -191,6 +204,16 @@ func SendEmailReg(item Data) {
 		log.Fatal(err)
 	}
 
+}
+
+func getImageBase64(imagePath string) string {
+	imageBytes, err := os.ReadFile(imagePath)
+	if err != nil {
+		log.Println("Ошибка при чтении изображения:", err)
+		return ""
+	}
+	base64Image := "data:image/jpeg;base64," + base64.StdEncoding.EncodeToString(imageBytes)
+	return base64Image
 }
 
 // log.Println("=fba203=", reflect.TypeOf(today))
