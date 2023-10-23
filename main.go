@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -23,10 +22,12 @@ type Data struct {
 
 func main() {
 	files_name := []string{"index.html", ".env", "users.json"}
-
 	CheckFilesAndConnectToEmail(files_name)
-
 	records := readJson("users.json")
+	findBirthdays(records)
+}
+
+func findBirthdays(records []Data) {
 	todayMonthDate := time.Now().Format("01/02")
 	foundBirthday := false
 	for _, item := range records {
@@ -62,14 +63,14 @@ func CheckFilesAndConnectToEmail(files_name []string) {
 		log.Fatal()
 	}
 
-	// d := gomail.NewDialer("smtp.yandex.ru", 465, "support@crypto-emergency.com", os.Getenv("EMAIL_PASS"))
-	// if err := d.DialAndSend(); err != nil {
-	// 	log.Printf("Не удалось отправить установить соединение с почтовым ящиком. Убедитесь ,что E-mail и пароль в файле .env указаны верно \n%v", err)
-	// 	time.Sleep(10 * time.Second)
-	// 	log.Fatal(err)
-	// } else {
-	// 	log.Println("Соединение с почтовым ящиком установлено.")
-	// }
+	d := gomail.NewDialer("smtp.yandex.ru", 465, "support@crypto-emergency.com", os.Getenv("EMAIL_PASS"))
+	if err := d.DialAndSend(); err != nil {
+		log.Println("Не удалось отправить установить соединение с почтовым ящиком. Убедитесь ,что E-mail и пароль в файле .env указаны верно")
+		time.Sleep(10 * time.Second)
+		log.Fatal()
+	} else {
+		log.Println("Соединение с почтовым ящиком установлено.")
+	}
 }
 
 func readJson(jsonName string) []Data {
@@ -113,7 +114,9 @@ func checkAndLog(item Data) {
 	decoder := json.NewDecoder(existingLogs)
 	err = decoder.Decode(&logs)
 	if err != nil {
-		fmt.Println("Ошибка при декодировании JSON:", err)
+		time.Sleep(10 * time.Second)
+		log.Fatal()
+		// fmt.Println("Ошибка при декодировании JSON:", err)
 		return
 	}
 
@@ -124,19 +127,24 @@ func checkAndLog(item Data) {
 			break
 		}
 	}
-
+	if itemAlreadyExists {
+		log.Println("Сегодня все поздравлены.")
+		time.Sleep(10 * time.Second)
+		log.Fatal()
+	}
 	if !itemAlreadyExists { //Если нет в логах - поздравить и записать в логи
 		SendEmailReg(item)
 		logs = append(logs, item)
-		logJson, err := json.Marshal(logs)
+		logJson, _ := json.Marshal(logs)
 		overwriteLogs, err := os.Create("./logs/" + log_name + ".json")
 		if err != nil {
-			fmt.Println("Unable to create file:", err)
-			os.Exit(1)
+			// fmt.Println("Unable to create file:", err)
+			log.Fatal()
 		}
 		_, err = overwriteLogs.Write(logJson)
 		if err != nil {
-			log.Println("=Ошибка записи в json=", err)
+			// log.Println("=Ошибка записи в json=", err)
+			log.Fatal()
 		}
 		defer overwriteLogs.Close()
 	}
@@ -145,29 +153,33 @@ func checkAndLog(item Data) {
 func create_log(item Data) {
 	log_name := time.Now().Format("01.02.2006")
 
-	newLog := []Data{item} //Форматирую item в Json
+	newLog := []Data{item}
 	logJson, err := json.Marshal(newLog)
 	if err != nil {
-
+		log.Fatal()
 		// log.Fatal("=Ошибка форматирования лога в json=", err)
 	}
 
 	if err := os.MkdirAll("./logs", os.ModePerm); err != nil {
-		log.Fatal("Ошибка при создании директории logs:", err)
+		// log.Fatal("Ошибка при создании директории logs:", err)
+		log.Fatal()
 	}
 	newLogs, err := os.Create("./logs/" + log_name + ".json")
 	if err != nil {
-		fmt.Println("Unable to create file:", err)
+		// fmt.Println("Unable to create file:", err)
+		log.Fatal()
 	}
 	_, err = newLogs.Write(logJson)
 	if err != nil {
-		log.Println("=Ошибка записи в json=", err)
+		// log.Println("=Ошибка записи в json=", err)
+		log.Fatal()
 	}
 	defer newLogs.Close()
 }
 
 func SendEmailReg(item Data) {
-	subject := "C др!"
+
+	subject := "C днем рождения!"
 	first_name := item.First_name
 	last_name := item.Last_name
 
@@ -175,7 +187,8 @@ func SendEmailReg(item Data) {
 
 	htmlBytes, err := os.ReadFile("index.html")
 	if err != nil {
-		fmt.Println("Ошибка при чтении файла index.html:", err)
+		// fmt.Println("Ошибка при чтении файла index.html:", err)
+		log.Fatal()
 		return
 	}
 	html := string(htmlBytes)
@@ -183,37 +196,18 @@ func SendEmailReg(item Data) {
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", "support@crypto-emergency.com")
-	log.Println("=30747d=", item.Email)
 	m.SetHeader("To", item.Email)
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/html", html)
-
-	// html = strings.ReplaceAll(html, "${s_uvazheniem_glava_munici.png}", s_uvazheniem_glava_munici)
-	// html = strings.ReplaceAll(html, "${image2}", image2)
-	// html = strings.ReplaceAll(html, "${image3}", image3)
-	m.Embed("./images/")
-	m.Embed("image1.png")
-	m.Embed("image2.png", "/images/img_4424.png")
-
-	related.Embed("image1", "https://example.com/image1.jpg")
 
 	d := gomail.NewDialer("smtp.yandex.ru", 465, "support@crypto-emergency.com", os.Getenv("EMAIL_PASS"))
 	if err := d.DialAndSend(m); err != nil {
 		// log.Println("Error SendEmailReg", err)
 		time.Sleep(10 * time.Second)
-		log.Fatal(err)
+		log.Fatal()
 	}
+	fmt.Printf("Поздравление отправлено:%s", item.Email)
 
-}
-
-func getImageBase64(imagePath string) string {
-	imageBytes, err := os.ReadFile(imagePath)
-	if err != nil {
-		log.Println("Ошибка при чтении изображения:", err)
-		return ""
-	}
-	base64Image := "data:image/jpeg;base64," + base64.StdEncoding.EncodeToString(imageBytes)
-	return base64Image
 }
 
 // log.Println("=fba203=", reflect.TypeOf(today))
