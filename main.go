@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"reflect"
 	"strings"
 	"time"
 
@@ -23,8 +24,10 @@ type Data struct {
 func main() {
 	files_name := []string{"index.html", ".env", "users.json"}
 	CheckFilesAndConnectToEmail(files_name)
-	records := readJson("users.json")
-	findBirthdays(records)
+	// records := readJson("users.json")
+	// findBirthdays(records)
+
+	Start()
 }
 
 func findBirthdays(records []Data) {
@@ -207,6 +210,40 @@ func SendEmailReg(item Data) {
 		log.Fatal()
 	}
 	fmt.Printf("Поздравление отправлено:%s", item.Email)
+	time.Sleep(10 * time.Second)
+
+}
+
+func SendEmail(email string) {
+
+	subject := "C днем рождения!"
+	// first_name := item.First_name
+	// last_name := item.Last_name
+
+	// replacer := strings.NewReplacer("${first_name}", first_name, "${last_name}", last_name)
+
+	htmlBytes, err := os.ReadFile("index.html")
+	if err != nil {
+		// fmt.Println("Ошибка при чтении файла index.html:", err)
+		log.Fatal()
+		return
+	}
+	html := string(htmlBytes)
+	// html = replacer.Replace(html)
+	log.Println("=b771ac=", reflect.TypeOf(email))
+	m := gomail.NewMessage()
+	m.SetHeader("From", os.Getenv("EMAIL"))
+	m.SetHeader("To", email)
+	m.SetHeader("Subject", subject)
+	m.SetBody("text/html", html)
+
+	d := gomail.NewDialer("smtp.mail.ru", 465, os.Getenv("EMAIL"), os.Getenv("EMAIL_PASS"))
+	if err := d.DialAndSend(m); err != nil {
+		log.Println("=8b66a8=", err)
+		time.Sleep(10 * time.Second)
+		log.Fatal()
+	}
+	fmt.Printf("Поздравление отправлено:%s", email)
 	time.Sleep(10 * time.Second)
 
 }
