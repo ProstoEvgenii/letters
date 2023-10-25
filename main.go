@@ -55,7 +55,7 @@ func CheckFilesAndConnectToEmail(files_name []string) {
 		}
 	}
 
-	log.Println("Все файлы на присутствуют.")
+	log.Println("Все файлы присутствуют.")
 
 	if err := godotenv.Load(".env"); err != nil {
 		log.Println("Файл .env не найден")
@@ -63,7 +63,7 @@ func CheckFilesAndConnectToEmail(files_name []string) {
 		log.Fatal()
 	}
 
-	d := gomail.NewDialer("smtp.yandex.ru", 465, "support@crypto-emergency.com", os.Getenv("EMAIL_PASS"))
+	d := gomail.NewDialer("smtp.mail.ru", 465, os.Getenv("EMAIL"), os.Getenv("EMAIL_PASS"))
 	if err := d.DialAndSend(); err != nil {
 		log.Println("Не удалось отправить установить соединение с почтовым ящиком. Убедитесь ,что E-mail и пароль в файле .env указаны верно")
 		time.Sleep(10 * time.Second)
@@ -195,18 +195,19 @@ func SendEmailReg(item Data) {
 	html = replacer.Replace(html)
 
 	m := gomail.NewMessage()
-	m.SetHeader("From", "support@crypto-emergency.com")
+	m.SetHeader("From", os.Getenv("EMAIL"))
 	m.SetHeader("To", item.Email)
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/html", html)
 
-	d := gomail.NewDialer("smtp.yandex.ru", 465, "support@crypto-emergency.com", os.Getenv("EMAIL_PASS"))
+	d := gomail.NewDialer("smtp.mail.ru", 465, os.Getenv("EMAIL"), os.Getenv("EMAIL_PASS"))
 	if err := d.DialAndSend(m); err != nil {
-		// log.Println("Error SendEmailReg", err)
+
 		time.Sleep(10 * time.Second)
 		log.Fatal()
 	}
 	fmt.Printf("Поздравление отправлено:%s", item.Email)
+	time.Sleep(10 * time.Second)
 
 }
 
