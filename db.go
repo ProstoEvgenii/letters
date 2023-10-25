@@ -5,12 +5,14 @@ import (
 	"log"
 	"os"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func Connect() {
+var collectionUsers *mongo.Collection
 
+func Connect() {
 	uri := "mongodb://" + os.Getenv("LOGIN") + ":" + os.Getenv("PASS") + "@" + os.Getenv("SERVER")
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 
@@ -23,7 +25,26 @@ func Connect() {
 	}
 
 	log.Println("База данных подключена упешно!")
+	collectionUsers = client.Database("crem").Collection("users")
 	return
+}
+
+func InsertIfNotExists(newDocument Data) *mongo.UpdateResult {
+	filter := bson.M{
+		"uniqueField": "uniqueValue",
+		// Фильтр для проверки уникальности
+	}
+	update := bson.M{
+		"$setOnInsert": newDocument,
+	}
+
+	opts := options.Update().SetUpsert(true)
+
+	cursor, err := collectionUsers.UpdateOne(context.TODO(), filter, update, opts)
+	if err != nil {
+		log.Println("=440c2b=", err)
+	}
+	return cursor
 }
 
 // func Find(filter, sort bson.M, limit int64, collName string) (*mongo.Cursor, error) {

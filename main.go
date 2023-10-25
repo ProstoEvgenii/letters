@@ -14,11 +14,11 @@ import (
 )
 
 type Data struct {
-	Last_name   string `json:"Фамилия"`
-	First_name  string `json:"Имя"`
-	Middle_name string `json:"Отчество"`
-	Date_birth  string `json:"Дата рождения"`
-	Email       string `json:"E-mail"`
+	Last_name   string `json:"Фамилия" bson:"Фамилия"`
+	First_name  string `json:"Имя" bson:"Имя"`
+	Middle_name string `json:"Отчество" bson:"Отчество"`
+	Date_birth  string `json:"Дата рождения" bson:"Дата рождения"`
+	Email       string `json:"E-mail" bson:"E-mail"`
 }
 
 func main() {
@@ -27,6 +27,7 @@ func main() {
 	// records := readJson("users.json")
 	// findBirthdays(records)
 
+	Connect()
 	Start()
 }
 
