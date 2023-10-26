@@ -13,6 +13,9 @@ type apiRequest struct {
 type updateBDRequest struct {
 	Email string `json:"email"`
 }
+type Response struct {
+	Count int64 `json:"count"`
+}
 
 func Start() {
 
@@ -34,18 +37,31 @@ func updateBD(rw http.ResponseWriter, request *http.Request) {
 		var data []Data
 		err := decoder.Decode(&data)
 		if err != nil {
-			panic(err)
-			// log.Fatal("Aborting", err)
+			log.Println("=b570dd=", err)
 		}
-		log.Println("=90674d=", data)
-		// SendEmail(data)
+		for _, item := range data {
+			InsertIfNotExists(item)
+		}
 		return
 	}
 }
 
 func ParseRequest(rw http.ResponseWriter, request *http.Request) {
 	if request.Method == "GET" {
-		fmt.Fprintf(rw, "Hello Get")
+		rw.Header().Set("Content-Type", "application/json")
+		rw.Header().Set("Access-Control-Allow-Origin", "*")
+		rw.Header().Set("Access-Control-Max-Age", "15")
+		itemCount := CountDocuments()
+		response := Response{
+			Count: itemCount,
+		}
+
+		itemCountJson, err := json.Marshal(response)
+		if err != nil {
+			fmt.Println("error:", err)
+		}
+		rw.Write(itemCountJson)
+		// fmt.Fprintf(rw, fmt.Sprintf("%v", itemCountJson))
 		return
 	} else if request.Method == "POST" {
 		rw.Header().Set("Content-Type", "application/json")

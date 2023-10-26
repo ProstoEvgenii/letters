@@ -17,7 +17,8 @@ type Data struct {
 	Last_name   string `json:"Фамилия" bson:"Фамилия"`
 	First_name  string `json:"Имя" bson:"Имя"`
 	Middle_name string `json:"Отчество" bson:"Отчество"`
-	Date_birth  string `json:"Дата рождения" bson:"Дата рождения"`
+	Date_birth  string `json:"Дата рождения" bson:"Дата
+	 рождения"`
 	Email       string `json:"E-mail" bson:"E-mail"`
 }
 
@@ -28,9 +29,15 @@ func main() {
 	// findBirthdays(records)
 
 	Connect()
+	CountDocuments()
 	Start()
 }
 
+
+func todayBirthday(){
+	// today := time.Now()
+	
+}
 func findBirthdays(records []Data) {
 	todayMonthDate := time.Now().Format("01/02")
 	foundBirthday := false
