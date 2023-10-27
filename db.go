@@ -31,34 +31,33 @@ func Connect() {
 	return
 }
 
-func InsertIfNotExists(document Data) {
+func InsertIfNotExists(document UsersUpload) int64 {
 	filter := bson.M{
 		"E-mail": document.Email,
 	}
-	update := bson.M{"$setOnInsert":  bson.M{
-		"Имя": document.First_name,
-		"Afvbkbz"
+
+	dateBirth, err := time.Parse("01/02/2006", document.Date_birth)
+	update := bson.M{"$setOnInsert": bson.M{
+		"Имя":           document.First_name,
+		"Фамилия":       document.Last_name,
+		"Отчество":      document.Middle_name,
 		"Дата рождения": dateBirth,
-	},
+		"E-mail":        document.Email,
+	}}
 
 	opts := options.Update().SetUpsert(true)
-	log.Println("=08c25b=", document.Date_birth)
-	dateBirth, err := time.Parse("01/02/2006", document.Date_birth)
-	// log.Println("=449df3=", dt1)
-	document.Date_birth = dateBirth
+
 	result, err := collectionUsers.UpdateOne(context.TODO(), filter, update, opts)
 	if err != nil {
 		log.Println("=InsertIfNotExists=", err)
 	}
-	// log.Println("=59201e=", result)
-	if result.MatchedCount != 0 {
-		fmt.Println("matched and replaced an existing document")
-		return
-	}
+	// if result.MatchedCount != 0 {
+	// 	fmt.Println("matched and replaced an existing document")
+	// }
 	if result.UpsertedCount != 0 {
 		fmt.Printf("inserted a new document with ID %v\n", result.UpsertedID)
 	}
-	return
+	return result.UpsertedCount
 }
 
 func CountDocuments() int64 {
