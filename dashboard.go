@@ -27,9 +27,12 @@ func Fi22ndBirthdays() []Users {
 	for _, user := range users {
 		if user.DateOfBirth.Day() == today.Day() && user.DateOfBirth.Month() == today.Month() {
 			result := CreateLog(user)
-			log.Println("=56eccc=", result)
+			if result != 0 {
+				log.Println("=56eccc=", result)
+				////Отправить письмо тут .Вынести этот цикл в отдельную функцию
+			}
+
 			birthdays_list = append(birthdays_list, user)
-			// log.Println("=afdf3c=", user.DateOfBirth.Day())
 		}
 	}
 
@@ -37,9 +40,10 @@ func Fi22ndBirthdays() []Users {
 }
 
 func CreateLog(user Users) int64 {
-	today := time.Now()
+	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
 	filter := bson.M{
-		"E-mail": user.Email,
+		"E-mail":     user.Email,
+		"dateCreate": currentDate,
 	}
 	update := bson.M{"$setOnInsert": bson.M{
 		"Имя":           user.FirstName,
@@ -47,7 +51,7 @@ func CreateLog(user Users) int64 {
 		"Отчество":      user.MiddleName,
 		"Дата рождения": user.DateOfBirth,
 		"E-mail":        user.Email,
-		"dateCreate":    today,
+		"dateCreate":    currentDate,
 	}}
 	result := InsertIfNotExists(user, filter, update, "logs").UpsertedCount
 	return result
