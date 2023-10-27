@@ -28,7 +28,7 @@ func main() {
 	// findBirthdays(records)
 
 	Connect()
-	CountDocuments()
+	// CountDocuments()
 	Start()
 }
 

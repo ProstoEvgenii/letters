@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -67,6 +68,16 @@ func CountDocuments() int64 {
 		log.Println("=2671f1=", err)
 	}
 	return itemCount
+}
+func Find(filter primitive.M) *mongo.Cursor {
+	ctx := context.TODO()
+
+	cursor, err := collectionUsers.Find(ctx, filter)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cursor.Close(ctx)
+	return cursor
 }
 
 // func Find(filter, sort bson.M, limit int64, collName string) (*mongo.Cursor, error) {

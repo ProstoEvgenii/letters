@@ -7,12 +7,10 @@ import (
 	"net/http"
 )
 
-type apiRequest struct {
-	Email string `json:"email"`
-}
-type updateBDRequest struct {
-	Email string `json:"email"`
-}
+// type apiRequest struct {
+// 	Email string `json:"email"`
+// }
+
 type Response struct {
 	Count int64 `json:"count"`
 }
@@ -97,7 +95,8 @@ func ParseRequest(rw http.ResponseWriter, request *http.Request) {
 		rw.Header().Set("Content-Type", "application/json")
 		rw.Header().Set("Access-Control-Allow-Origin", "*")
 		rw.Header().Set("Access-Control-Max-Age", "15")
-		itemCount := CountDocuments()
+
+		itemCount := Dashboard()
 		response := Response{
 			Count: itemCount,
 		}
@@ -107,7 +106,6 @@ func ParseRequest(rw http.ResponseWriter, request *http.Request) {
 			fmt.Println("error:", err)
 		}
 		rw.Write(itemCountJson)
-		// fmt.Fprintf(rw, fmt.Sprintf("%v", itemCountJson))
 		return
 	} else if request.Method == "POST" {
 		// r.FormFile("userFile")
