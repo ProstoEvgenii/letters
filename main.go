@@ -13,14 +13,6 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-type Data struct {
-	Last_name   string `json:"Фамилия" bson:"Фамилия"`
-	First_name  string `json:"Имя" bson:"Имя"`
-	Middle_name string `json:"Отчество" bson:"Отчество"`
-	Date_birth  string `json:"Дата рождения" bson:"Дата рождения"`
-	Email       string `json:"E-mail" bson:"E-mail"`
-}
-
 func main() {
 	files_name := []string{"index.html", ".env", "users.json"}
 	CheckFilesAndConnectToEmail(files_name)

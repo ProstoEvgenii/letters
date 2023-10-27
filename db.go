@@ -2,10 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -14,6 +12,7 @@ import (
 )
 
 var collectionUsers *mongo.Collection
+var collectionLogs *mongo.Collection
 
 func Connect() {
 	uri := "mongodb://" + os.Getenv("LOGIN") + ":" + os.Getenv("PASS") + "@" + os.Getenv("SERVER")
@@ -29,36 +28,36 @@ func Connect() {
 
 	log.Println("База данных подключена упешно!")
 	collectionUsers = client.Database(os.Getenv("BASE")).Collection("users")
+	collectionLogs = client.Database(os.Getenv("BASE")).Collection("logs")
 	return
 }
 
-func InsertIfNotExists(document UsersUpload) int64 {
-	filter := bson.M{
-		"E-mail": document.Email,
-	}
-
-	dateBirth, err := time.Parse("01/02/2006", document.Date_birth)
-	update := bson.M{"$setOnInsert": bson.M{
-		"Имя":           document.First_name,
-		"Фамилия":       document.Last_name,
-		"Отчество":      document.Middle_name,
-		"Дата рождения": dateBirth,
-		"E-mail":        document.Email,
-	}}
+func InsertIfNotExists(document interface{}, filter, update primitive.M, collName string) *mongo.UpdateResult {
 
 	opts := options.Update().SetUpsert(true)
+	ctx := context.TODO()
+	switch collName {
+	case "users":
+		result, err := collectionUsers.UpdateOne(ctx, filter, update, opts)
+		if err != nil {
+			log.Println("=InsertIfNotExists=", err)
+		}
+		return result
 
-	result, err := collectionUsers.UpdateOne(context.TODO(), filter, update, opts)
-	if err != nil {
-		log.Println("=InsertIfNotExists=", err)
+	case "logs":
+		result, err := collectionLogs.UpdateOne(ctx, filter, update, opts)
+		if err != nil {
+			log.Println("=InsertIfNotExists=", err)
+		}
+		return result
 	}
 	// if result.MatchedCount != 0 {
 	// 	fmt.Println("matched and replaced an existing document")
 	// }
-	if result.UpsertedCount != 0 {
-		fmt.Printf("inserted a new document with ID %v\n", result.UpsertedID)
-	}
-	return result.UpsertedCount
+	// if result.UpsertedCount != 0 {
+	// 	fmt.Printf("inserted a new document with ID %v\n", result.UpsertedID)
+	// }
+	return nil
 }
 
 func CountDocuments() int64 {
@@ -69,14 +68,25 @@ func CountDocuments() int64 {
 	}
 	return itemCount
 }
-func Find(filter primitive.M) *mongo.Cursor {
-	ctx := context.TODO()
 
-	cursor, err := collectionUsers.Find(ctx, filter)
-	if err != nil {
-		log.Fatal(err)
+func Find(filter primitive.M, collName string) *mongo.Cursor {
+	ctx := context.TODO()
+	switch collName {
+	case "users":
+		cursor, err := collectionUsers.Find(ctx, filter)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return cursor
+
+	case "logs":
+		cursor, err := collectionLogs.Find(ctx, filter)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return cursor
 	}
-	return cursor
+	return nil
 }
 
 // func Find(filter, sort bson.M, limit int64, collName string) (*mongo.Cursor, error) {

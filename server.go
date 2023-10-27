@@ -5,22 +5,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 // type apiRequest struct {
 // 	Email string `json:"email"`
 // }
-
-type Response struct {
-	Count int64 `json:"count"`
-}
-type UsersUpload struct {
-	Last_name   string `json:"Фамилия" bson:"Фамилия"`
-	First_name  string `json:"Имя" bson:"Имя"`
-	Middle_name string `json:"Отчество" bson:"Отчество"`
-	Date_birth  string `json:"Дата рождения" bson:"Дата рождения"`
-	Email       string `json:"E-mail" bson:"E-mail"`
-}
 
 func Start() {
 
@@ -75,8 +67,20 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var result int64
-	for _, item := range users {
-		result += InsertIfNotExists(item)
+
+	for _, document := range users {
+		filter := bson.M{
+			"E-mail": document.Email,
+		}
+		dateBirth, _ := time.Parse("01/02/2006", document.Date_birth)
+		update := bson.M{"$setOnInsert": bson.M{
+			"Имя":           document.First_name,
+			"Фамилия":       document.Last_name,
+			"Отчество":      document.Middle_name,
+			"Дата рождения": dateBirth,
+			"E-mail":        document.Email,
+		}}
+		result += InsertIfNotExists(document, filter, update, "users").UpsertedCount
 	}
 
 	response := Response{
@@ -96,9 +100,10 @@ func ParseRequest(rw http.ResponseWriter, request *http.Request) {
 		rw.Header().Set("Access-Control-Allow-Origin", "*")
 		rw.Header().Set("Access-Control-Max-Age", "15")
 
-		itemCount := Dashboard()
+		usersCount, birthdaysListLen := Dashboard()
 		response := Response{
-			Count: itemCount,
+			Count:         usersCount,
+			CountBirtdays: birthdaysListLen,
 		}
 
 		itemCountJson, err := json.Marshal(response)
