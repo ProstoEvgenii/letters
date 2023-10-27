@@ -76,7 +76,6 @@ func Find(filter primitive.M) *mongo.Cursor {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer cursor.Close(ctx)
 	return cursor
 }
 

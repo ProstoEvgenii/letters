@@ -18,15 +18,22 @@ type CollUsers struct {
 
 func Dashboard() int64 {
 	itemCount := CountDocuments()
-
+	today := time.Now()
 	filter := bson.M{}
 	cursor := Find(filter)
-	var users CollUsers
+	var users []CollUsers
 	err := cursor.All(context.TODO(), &users)
 	if err != nil {
 		log.Println("=84ce91=", err)
 	}
-	log.Println("=54c6f9=",users)
+	// log.Println("=54c6f9=", users)
+	// log.Println("=0788d2=", today.Day())
+	// log.Println("=5dec2e=",)
+	for _, user := range users {
+		if user.DateOfBirth.Day() == today.Day() {
+			log.Println("=afdf3c=", user.DateOfBirth.Day())
+		}
+	}
 
 	return itemCount
 }
