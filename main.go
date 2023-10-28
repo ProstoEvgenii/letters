@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -19,6 +18,7 @@ func main() {
 
 	Connect()
 	GetTemplate()
+	Dashboard()
 	// CountDocuments()
 	Start()
 }
@@ -173,38 +173,38 @@ func CheckFilesAndConnectToEmail(files_name []string) {
 // 	defer newLogs.Close()
 // }
 
-func SendEmail(item Data) {
-	subject := "C днем рождения!"
-	first_name := item.First_name
-	last_name := item.Last_name
+// func SendEmail(item Data) {
+// 	subject := "C днем рождения!"
+// 	first_name := item.First_name
+// 	last_name := item.Last_name
 
-	replacer := strings.NewReplacer("${first_name}", first_name, "${last_name}", last_name)
+// 	replacer := strings.NewReplacer("${first_name}", first_name, "${last_name}", last_name)
 
-	htmlBytes, err := os.ReadFile("index.html")
-	if err != nil {
-		// fmt.Println("Ошибка при чтении файла index.html:", err)
-		log.Fatal()
-		return
-	}
-	html := string(htmlBytes)
-	html = replacer.Replace(html)
+// 	htmlBytes, err := os.ReadFile("index.html")
+// 	if err != nil {
+// 		// fmt.Println("Ошибка при чтении файла index.html:", err)
+// 		log.Fatal()
+// 		return
+// 	}
+// 	html := string(htmlBytes)
+// 	html = replacer.Replace(html)
 
-	m := gomail.NewMessage()
-	m.SetHeader("From", os.Getenv("EMAIL"))
-	m.SetHeader("To", item.Email)
-	m.SetHeader("Subject", subject)
-	m.SetBody("text/html", html)
+// 	m := gomail.NewMessage()
+// 	m.SetHeader("From", os.Getenv("EMAIL"))
+// 	m.SetHeader("To", item.Email)
+// 	m.SetHeader("Subject", subject)
+// 	m.SetBody("text/html", html)
 
-	d := gomail.NewDialer("smtp.mail.ru", 465, os.Getenv("EMAIL"), os.Getenv("EMAIL_PASS"))
-	if err := d.DialAndSend(m); err != nil {
+// 	d := gomail.NewDialer("smtp.mail.ru", 465, os.Getenv("EMAIL"), os.Getenv("EMAIL_PASS"))
+// 	if err := d.DialAndSend(m); err != nil {
 
-		time.Sleep(10 * time.Second)
-		log.Fatal()
-	}
-	fmt.Printf("Поздравление отправлено:%s", item.Email)
-	time.Sleep(10 * time.Second)
+// 		time.Sleep(10 * time.Second)
+// 		log.Fatal()
+// 	}
+// 	fmt.Printf("Поздравление отправлено:%s", item.Email)
+// 	time.Sleep(10 * time.Second)
 
-}
+// }
 
 // func SendEmail(email string) {
 

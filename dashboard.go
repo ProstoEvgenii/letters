@@ -15,6 +15,7 @@ import (
 func Dashboard() (int64, int) {
 	usersCount := CountDocuments()
 	birthdays_list := CreateBirthdaysSlice()
+	checkLogsAndSendEmail()
 	return usersCount, len(birthdays_list)
 }
 func CreateBirthdaysSlice() []Users {
@@ -30,12 +31,6 @@ func CreateBirthdaysSlice() []Users {
 	var birthdays_list []Users
 	for _, user := range users {
 		if user.DateOfBirth.Day() == today.Day() && user.DateOfBirth.Month() == today.Month() {
-			// result := CreateLog(user)
-			// if result != 0 {
-			// log.Println("=56eccc=", result)
-			////Отправить письмо тут .Вынести этот цикл в отдельную функцию
-			// }
-
 			birthdays_list = append(birthdays_list, user)
 		}
 	}
@@ -43,7 +38,7 @@ func CreateBirthdaysSlice() []Users {
 	return birthdays_list
 }
 
-func GetTemplate() {
+func GetTemplate() string {
 	filter := bson.M{
 		"name": "test1",
 	}
@@ -52,54 +47,49 @@ func GetTemplate() {
 	if err := cursor.All(context.TODO(), &template); err != nil {
 		log.Println("=8922b7=", err)
 	}
-	// log.Println("=a1e37e=", template)
-
+	// log.Println("=a1e37e=", template[0])
+	return template[0].IndexHTML
 }
 
-func SendEmail() {
+func checkLogsAndSendEmail() {
 	birthdays_list := CreateBirthdaysSlice()
-	logAlreadyExists := false
+	if len(birthdays_list) == 0 {
+		log.Println("=acb3f9=", "Нет Дней рождения")
+		return
+	}
+	logNotExists := false
+
 	for _, user := range birthdays_list {
-
 		result := CreateLog(user)
-		if result != 0 {
-			log.Println("=56eccc=", result)
-			//Отправить письмо тут .Вынести этот цикл в отдельную функцию
-		}
-		// result := CreateLog(user)
-		// if result != 0 {
-		// log.Println("=56eccc=", result)
-		////Отправить письмо тут .Вынести этот цикл в отдельную функцию
-		// }
-
-	}
-
-	itemAlreadyExists := false
-	for _, log := range logs {
-		if log == item {
-			itemAlreadyExists = true
-			break
+		if result != 0 { //Если результат создания лога == 0 ,значит лог с таким email существует и поздравлять его не нужно
+			SendEmail(user)
+			logNotExists = true
 		}
 	}
+	if !logNotExists {
+		log.Println("=e7685d=", "Сегодня все поздравлены")
+	}
 
+}
+func SendEmail(user Users) {
 	first_name := user.FirstName
 	last_name := user.FirstName
 	subject := "C днем рождения!"
 
 	replacer := strings.NewReplacer("${first_name}", first_name, "${last_name}", last_name)
 
-	htmlBytes, err := os.ReadFile("index.html")
-	if err != nil {
-		// fmt.Println("Ошибка при чтении файла index.html:", err)
-		log.Fatal()
-		return
-	}
-	html := string(htmlBytes)
+	// htmlBytes, err := os.ReadFile("index.html")
+	// if err != nil {
+	// 	// fmt.Println("Ошибка при чтении файла index.html:", err)
+	// 	log.Fatal()
+	// 	return
+	// }
+	html := GetTemplate()
 	html = replacer.Replace(html)
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", os.Getenv("EMAIL"))
-	m.SetHeader("To", item.Email)
+	m.SetHeader("To", user.Email)
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/html", html)
 
@@ -109,9 +99,8 @@ func SendEmail() {
 		time.Sleep(10 * time.Second)
 		log.Fatal()
 	}
-	fmt.Printf("Поздравление отправлено:%s", item.Email)
+	fmt.Printf("Поздравление отправлено:%s", user.Email)
 	time.Sleep(10 * time.Second)
-
 }
 
 func CreateLog(user Users) int64 {
