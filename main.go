@@ -20,7 +20,7 @@ func main() {
 	Connect()
 	GetTemplate()
 	// CountDocuments()
-	// Start()
+	Start()
 }
 
 // func findBirthdays(records []Data) {

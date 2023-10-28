@@ -2,10 +2,14 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"os"
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"gopkg.in/gomail.v2"
 )
 
 func Dashboard() (int64, int) {
@@ -26,11 +30,11 @@ func CreateBirthdaysSlice() []Users {
 	var birthdays_list []Users
 	for _, user := range users {
 		if user.DateOfBirth.Day() == today.Day() && user.DateOfBirth.Month() == today.Month() {
-			result := CreateLog(user)
-			if result != 0 {
-				log.Println("=56eccc=", result)
-				////Отправить письмо тут .Вынести этот цикл в отдельную функцию
-			}
+			// result := CreateLog(user)
+			// if result != 0 {
+			// log.Println("=56eccc=", result)
+			////Отправить письмо тут .Вынести этот цикл в отдельную функцию
+			// }
 
 			birthdays_list = append(birthdays_list, user)
 		}
@@ -48,7 +52,65 @@ func GetTemplate() {
 	if err := cursor.All(context.TODO(), &template); err != nil {
 		log.Println("=8922b7=", err)
 	}
-	log.Println("=a1e37e=", (template))
+	// log.Println("=a1e37e=", template)
+
+}
+
+func SendEmail() {
+	birthdays_list := CreateBirthdaysSlice()
+	logAlreadyExists := false
+	for _, user := range birthdays_list {
+
+		result := CreateLog(user)
+		if result != 0 {
+			log.Println("=56eccc=", result)
+			//Отправить письмо тут .Вынести этот цикл в отдельную функцию
+		}
+		// result := CreateLog(user)
+		// if result != 0 {
+		// log.Println("=56eccc=", result)
+		////Отправить письмо тут .Вынести этот цикл в отдельную функцию
+		// }
+
+	}
+
+	itemAlreadyExists := false
+	for _, log := range logs {
+		if log == item {
+			itemAlreadyExists = true
+			break
+		}
+	}
+
+	first_name := user.FirstName
+	last_name := user.FirstName
+	subject := "C днем рождения!"
+
+	replacer := strings.NewReplacer("${first_name}", first_name, "${last_name}", last_name)
+
+	htmlBytes, err := os.ReadFile("index.html")
+	if err != nil {
+		// fmt.Println("Ошибка при чтении файла index.html:", err)
+		log.Fatal()
+		return
+	}
+	html := string(htmlBytes)
+	html = replacer.Replace(html)
+
+	m := gomail.NewMessage()
+	m.SetHeader("From", os.Getenv("EMAIL"))
+	m.SetHeader("To", item.Email)
+	m.SetHeader("Subject", subject)
+	m.SetBody("text/html", html)
+
+	d := gomail.NewDialer("smtp.mail.ru", 465, os.Getenv("EMAIL"), os.Getenv("EMAIL_PASS"))
+	if err := d.DialAndSend(m); err != nil {
+
+		time.Sleep(10 * time.Second)
+		log.Fatal()
+	}
+	fmt.Printf("Поздравление отправлено:%s", item.Email)
+	time.Sleep(10 * time.Second)
 
 }
 
