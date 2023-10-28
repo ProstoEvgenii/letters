@@ -10,10 +10,10 @@ import (
 
 func Dashboard() (int64, int) {
 	usersCount := CountDocuments()
-	birthdays_list := Fi22ndBirthdays()
+	birthdays_list := CreateBirthdaysSlice()
 	return usersCount, len(birthdays_list)
 }
-func Fi22ndBirthdays() []Users {
+func CreateBirthdaysSlice() []Users {
 	today := time.Now()
 	filter := bson.M{}
 	cursor := Find(filter, "users")
@@ -37,6 +37,19 @@ func Fi22ndBirthdays() []Users {
 	}
 
 	return birthdays_list
+}
+
+func GetTemplate() {
+	filter := bson.M{
+		"name": "test1",
+	}
+	cursor := Find(filter, "templates")
+	var template []Templates
+	if err := cursor.All(context.TODO(), &template); err != nil {
+		log.Println("=8922b7=", err)
+	}
+	log.Println("=a1e37e=", (template))
+
 }
 
 func CreateLog(user Users) int64 {

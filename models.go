@@ -9,6 +9,10 @@ type Users struct {
 	DateOfBirth time.Time `bson:"Дата рождения"`
 	Email       string    `bson:"E-mail"`
 }
+type Templates struct {
+	Name      string `bson:"name"`
+	IndexHTML string `bson:"indexHTML"`
+}
 
 // type UserLOg struct {
 // 	FirstName   string    `bson:"Имя"`

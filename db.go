@@ -13,6 +13,7 @@ import (
 
 var collectionUsers *mongo.Collection
 var collectionLogs *mongo.Collection
+var collectionTemplates *mongo.Collection
 
 func Connect() {
 	uri := "mongodb://" + os.Getenv("LOGIN") + ":" + os.Getenv("PASS") + "@" + os.Getenv("SERVER")
@@ -29,6 +30,7 @@ func Connect() {
 	log.Println("База данных подключена упешно!")
 	collectionUsers = client.Database(os.Getenv("BASE")).Collection("users")
 	collectionLogs = client.Database(os.Getenv("BASE")).Collection("logs")
+	collectionTemplates = client.Database(os.Getenv("BASE")).Collection("templates")
 	return
 }
 
@@ -85,7 +87,14 @@ func Find(filter primitive.M, collName string) *mongo.Cursor {
 			log.Fatal(err)
 		}
 		return cursor
+	case "templates":
+		cursor, err := collectionTemplates.Find(ctx, filter)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return cursor
 	}
+
 	return nil
 }
 
