@@ -16,7 +16,7 @@ func Dashboard() (int64, int) {
 	usersCount := CountDocuments()
 	birthdays_list := CreateBirthdaysSlice()
 	checkLogsAndSendEmail()
-	return usersCount, len(birthdays_list)
+ 	return usersCount, len(birthdays_list)
 }
 func CreateBirthdaysSlice() []Users {
 	today := time.Now()
