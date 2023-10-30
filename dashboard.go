@@ -12,11 +12,12 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-func Dashboard() (int64, int) {
+func Dashboard() (int64, int, int) {
 	usersCount := CountDocuments()
 	birthdays_list := CreateBirthdaysSlice()
+	todayLogsNumber := getLogs()
 	// checkLogsAndSendEmail()
-	return usersCount, len(birthdays_list)
+	return usersCount, len(birthdays_list), todayLogsNumber
 }
 func CreateBirthdaysSlice() []Users {
 	today := time.Now()
@@ -46,7 +47,6 @@ func GetTemplate() string {
 	if err := cursor.All(context.TODO(), &template); err != nil {
 		log.Println("=8922b7=", err)
 	}
-	// log.Println("=a1e37e=", template[0])
 	return template[0].IndexHTML
 }
 
@@ -62,7 +62,7 @@ func checkLogsAndSendEmail() string {
 
 	for _, user := range birthdays_list {
 		result := CreateLog(user)
-		if result != 0 { 
+		if result != 0 {
 			//Если результат создания лога == 0 ,значит лог с таким email существует и поздравлять его не нужно
 			SendEmail(user)
 			emailSent += 1
@@ -109,6 +109,20 @@ func SendEmail(user Users) {
 	time.Sleep(10 * time.Second)
 }
 
+func getLogs() int {
+	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
+	filter := bson.M{
+		"dateCreate": currentDate,
+	}
+	cursor := Find(filter, "logs")
+	var logs []Logs
+	if err := cursor.All(context.TODO(), &logs); err != nil {
+		log.Println("=8922b7=", err)
+	}
+	log.Println("=Сегодня поздравлено=", logs)
+	return len(logs)
+
+}
 func CreateLog(user Users) int64 {
 	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
 	filter := bson.M{

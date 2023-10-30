@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -40,17 +39,17 @@ func main() {
 // }
 
 func CheckFilesAndConnectToEmail(files_name []string) {
-	fmt.Println("Проверяю файлы в папке...")
+	// fmt.Println("Проверяю файлы в папке...")
 
-	for _, item := range files_name {
-		if _, err := os.Stat(item); os.IsNotExist(err) {
-			fmt.Printf("Файл %s не найден в корне проекта.\n", item)
-			time.Sleep(10 * time.Second)
-			log.Fatal()
-		}
-	}
+	// for _, item := range files_name {
+	// 	if _, err := os.Stat(item); os.IsNotExist(err) {
+	// 		fmt.Printf("Файл %s не найден в корне проекта.\n", item)
+	// 		time.Sleep(10 * time.Second)
+	// 		log.Fatal()
+	// 	}
+	// }
 
-	log.Println("Все файлы присутствуют.")
+	// log.Println("Все файлы присутствуют.")
 
 	if err := godotenv.Load(".env"); err != nil {
 		log.Println("Файл .env не найден")

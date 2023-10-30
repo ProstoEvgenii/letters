@@ -14,22 +14,24 @@ type Templates struct {
 	IndexHTML string `bson:"indexHTML"`
 }
 
-// type UserLOg struct {
-// 	FirstName   string    `bson:"Имя"`
-// 	LastName    string    `bson:"Фамилия"`
-// 	MiddleName  string    `bson:"Отчество"`
-// 	DateOfBirth time.Time `bson:"Дата рождения"`
-// 	Email       string    `bson:"E-mail"`
-// 	DateCreate  time.Time `bson:"dateCreate"`
-// }
+type Logs struct {
+	FirstName   string    `bson:"Имя"`
+	LastName    string    `bson:"Фамилия"`
+	MiddleName  string    `bson:"Отчество"`
+	DateOfBirth time.Time `bson:"Дата рождения"`
+	Email       string    `bson:"E-mail"`
+	DateCreate  time.Time `bson:"dateCreate"`
+}
 type Dashboard_Params struct {
 	SendAll string `json:"sendAll"`
 }
 
 type Response struct {
-	Count         int64  `json:"count"`
-	CountBirtdays int    `json:"countBirtdays"`
-	SendEmail     string `json:"sendEmail"`
+	DocumentsCount    int64  `json:"documentsCount"`
+	CountBirtdays     int    `json:"countBirtdays"`
+	CountLogs         int    `json:"сountNumber"`
+	DocumentsInserted int64  `json:"documentsInserted"`
+	SendEmail         string `json:"sendEmail"`
 }
 type UsersUpload struct {
 	Last_name   string `json:"Фамилия" bson:"Фамилия"`

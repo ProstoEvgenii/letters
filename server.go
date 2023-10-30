@@ -70,7 +70,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Ошибка при разборе JSON:", err)
 		return
 	}
-	var result int64
+	var documentsInserted int64
 
 	for _, document := range users {
 		filter := bson.M{
@@ -84,11 +84,11 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 			"Дата рождения": dateBirth,
 			"E-mail":        document.Email,
 		}}
-		result += InsertIfNotExists(document, filter, update, "users").UpsertedCount
+		documentsInserted += InsertIfNotExists(document, filter, update, "users").UpsertedCount
 	}
 
 	response := Response{
-		Count: result,
+		DocumentsInserted: documentsInserted,
 	}
 
 	usersAdded, err := json.Marshal(response)
@@ -113,18 +113,19 @@ func GetInfo(rw http.ResponseWriter, request *http.Request) {
 			SendEmailResult = checkLogsAndSendEmail()
 		}
 
-		usersCount, birthdaysListLen := Dashboard()
+		usersCount, birthdaysListLen, todayLogsNumber := Dashboard()
 		response := Response{
-			Count:         usersCount,
-			CountBirtdays: birthdaysListLen,
-			SendEmail:     SendEmailResult,
+			DocumentsCount: usersCount,
+			CountBirtdays:  birthdaysListLen,
+			CountLogs:      todayLogsNumber,
+			SendEmail:      SendEmailResult,
 		}
 
 		itemCountJson, err := json.Marshal(response)
 		if err != nil {
 			fmt.Println("error:", err)
 		}
-		log.Println("=42687c=", string(itemCountJson))
+		// log.Println("=42687c=", string(itemCountJson))
 		rw.Write(itemCountJson)
 		return
 	} else if request.Method == "POST" {
