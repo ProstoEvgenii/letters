@@ -22,6 +22,9 @@ type Templates struct {
 // 	Email       string    `bson:"E-mail"`
 // 	DateCreate  time.Time `bson:"dateCreate"`
 // }
+type Dashboard_Params struct {
+	SendAll string `json:"sendAll"`
+}
 
 type Response struct {
 	Count         int64 `json:"count"`

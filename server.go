@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
 
+	"github.com/gorilla/schema"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -17,9 +19,11 @@ import (
 func Start() {
 
 	http.HandleFunc("/", anyPage)
-	http.HandleFunc("/api", ParseRequest)
+	http.HandleFunc("/api/Dashboard/", GetInfo)
 	// http.HandleFunc("/api/updateBD", updateBD)
-	http.HandleFunc("/api/upload", uploadHandler)
+	http.HandleFunc("/api/Dashboard/upload", uploadHandler)
+	// http.HandleFunc("/api/Dashboard/upload", uploadHandler)
+
 	http.ListenAndServe(":80", nil)
 
 }
@@ -58,7 +62,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	fileBytes, err := io.ReadAll(file) // Читаем содержимое файла в срез байтов
 	if err != nil {
-		// http.Error(w, "Не удалось прочитать файл", http.StatusInternalServerError)
+		http.Error(w, "Не удалось прочитать файл", http.StatusInternalServerError)
 		return
 	}
 	var users []UsersUpload //  Форматитирую срез байтов в структуру
@@ -94,7 +98,16 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(usersAdded)
 }
-func ParseRequest(rw http.ResponseWriter, request *http.Request) {
+func GetInfo(rw http.ResponseWriter, request *http.Request) {
+	params := new(Dashboard_Params)
+	if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
+		log.Println("=Params schema Error News_=", err)
+	}
+	if params.SendAll == "true" {
+		log.Println("=4923c1=", params.SendAll)
+		checkLogsAndSendEmail()
+	}
+
 	if request.Method == "GET" {
 		rw.Header().Set("Content-Type", "application/json")
 		rw.Header().Set("Access-Control-Allow-Origin", "*")

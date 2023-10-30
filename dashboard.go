@@ -15,8 +15,8 @@ import (
 func Dashboard() (int64, int) {
 	usersCount := CountDocuments()
 	birthdays_list := CreateBirthdaysSlice()
-	checkLogsAndSendEmail()
- 	return usersCount, len(birthdays_list)
+	// checkLogsAndSendEmail()
+	return usersCount, len(birthdays_list)
 }
 func CreateBirthdaysSlice() []Users {
 	today := time.Now()
@@ -27,7 +27,6 @@ func CreateBirthdaysSlice() []Users {
 	if err != nil {
 		log.Println("=84ce91=", err)
 	}
-
 	var birthdays_list []Users
 	for _, user := range users {
 		if user.DateOfBirth.Day() == today.Day() && user.DateOfBirth.Month() == today.Month() {
@@ -73,7 +72,7 @@ func checkLogsAndSendEmail() {
 }
 func SendEmail(user Users) {
 	first_name := user.FirstName
-	last_name := user.FirstName
+	last_name := user.LastName
 	subject := "C днем рождения!"
 
 	replacer := strings.NewReplacer("${first_name}", first_name, "${last_name}", last_name)
