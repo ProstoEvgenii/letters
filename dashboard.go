@@ -50,23 +50,30 @@ func GetTemplate() string {
 	return template[0].IndexHTML
 }
 
-func checkLogsAndSendEmail() {
+func checkLogsAndSendEmail() string {
+	var result string
 	birthdays_list := CreateBirthdaysSlice()
 	if len(birthdays_list) == 0 {
-		log.Println("=acb3f9=", "Нет Дней рождения")
-		return
+		result = "Нет Дней рождений сегодня"
+		return result
 	}
-	logNotExists := false
+
+	emailSent := 0
 
 	for _, user := range birthdays_list {
 		result := CreateLog(user)
-		if result != 0 { //Если результат создания лога == 0 ,значит лог с таким email существует и поздравлять его не нужно
+		if result != 0 { 
+			//Если результат создания лога == 0 ,значит лог с таким email существует и поздравлять его не нужно
 			SendEmail(user)
-			logNotExists = true
+			emailSent += 1
 		}
 	}
-	if !logNotExists {
-		log.Println("=e7685d=", "Сегодня все поздравлены")
+	if emailSent == 0 {
+		result = "Сегодня все поздравлены"
+		return result
+	} else {
+		result = fmt.Sprintf("Поздравлено %d пользователей", emailSent)
+		return result
 	}
 
 }

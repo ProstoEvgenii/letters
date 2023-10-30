@@ -17,9 +17,8 @@ func main() {
 	// findBirthdays(records)
 
 	Connect()
-	GetTemplate()
-	Dashboard()
-	// CountDocuments()
+	// GetTemplate()
+	// Dashboard()
 	Start()
 }
 

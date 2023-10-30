@@ -99,30 +99,32 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(usersAdded)
 }
 func GetInfo(rw http.ResponseWriter, request *http.Request) {
-	params := new(Dashboard_Params)
-	if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
-		log.Println("=Params schema Error News_=", err)
-	}
-	if params.SendAll == "true" {
-		log.Println("=4923c1=", params.SendAll)
-		checkLogsAndSendEmail()
-	}
-
+	rw.Header().Set("Content-Type", "application/json")
+	rw.Header().Set("Access-Control-Allow-Origin", "*")
+	rw.Header().Set("Access-Control-Max-Age", "15")
 	if request.Method == "GET" {
-		rw.Header().Set("Content-Type", "application/json")
-		rw.Header().Set("Access-Control-Allow-Origin", "*")
-		rw.Header().Set("Access-Control-Max-Age", "15")
+		params := new(Dashboard_Params)
+		if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
+			log.Println("=Params schema Error News_=", err)
+		}
+
+		var SendEmailResult string
+		if params.SendAll == "true" {
+			SendEmailResult = checkLogsAndSendEmail()
+		}
 
 		usersCount, birthdaysListLen := Dashboard()
 		response := Response{
 			Count:         usersCount,
 			CountBirtdays: birthdaysListLen,
+			SendEmail:     SendEmailResult,
 		}
 
 		itemCountJson, err := json.Marshal(response)
 		if err != nil {
 			fmt.Println("error:", err)
 		}
+		log.Println("=42687c=", string(itemCountJson))
 		rw.Write(itemCountJson)
 		return
 	} else if request.Method == "POST" {
