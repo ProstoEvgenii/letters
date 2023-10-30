@@ -2,16 +2,46 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/gorilla/schema"
 	"go.mongodb.org/mongo-driver/bson"
 	"gopkg.in/gomail.v2"
 )
 
+func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
+	params := new(Dashboard_Params)
+	if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
+		log.Println("=Params schema Error News_=", err)
+	}
+
+	var SendEmailResult string
+	if params.SendAll == "true" {
+		SendEmailResult = checkLogsAndSendEmail()
+	}
+
+	usersCount, birthdaysListLen, todayLogsNumber := Dashboard()
+	response := Response{
+		DocumentsCount: usersCount,
+		CountBirtdays:  birthdaysListLen,
+		CountLogs:      todayLogsNumber,
+		SendEmail:      SendEmailResult,
+	}
+
+	itemCountJson, err := json.Marshal(response)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	// log.Println("=42687c=", string(itemCountJson))
+	rw.Write(itemCountJson)
+	return
+}
 func Dashboard() (int64, int, int) {
 	usersCount := CountDocuments()
 	birthdays_list := CreateBirthdaysSlice()
@@ -119,7 +149,7 @@ func getLogs() int {
 	if err := cursor.All(context.TODO(), &logs); err != nil {
 		log.Println("=8922b7=", err)
 	}
-	log.Println("=Сегодня поздравлено=", logs)
+	// log.Println("=Сегодня поздравлено=", logs)
 	return len(logs)
 
 }

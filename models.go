@@ -29,9 +29,9 @@ type Dashboard_Params struct {
 type Response struct {
 	DocumentsCount    int64  `json:"documentsCount"`
 	CountBirtdays     int    `json:"countBirtdays"`
-	CountLogs         int    `json:"сountNumber"`
+	CountLogs         int    `json:"countLogs"`
 	DocumentsInserted int64  `json:"documentsInserted"`
-	SendEmail         string `json:"sendEmail"`
+	SendEmail         string `json:"sendEmailresult"`
 }
 type UsersUpload struct {
 	Last_name   string `json:"Фамилия" bson:"Фамилия"`

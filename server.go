@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gorilla/schema"
@@ -17,16 +18,40 @@ import (
 // }
 
 func Start() {
-
-	http.HandleFunc("/", anyPage)
-	http.HandleFunc("/api/Dashboard/", GetInfo)
-	// http.HandleFunc("/api/updateBD", updateBD)
+	http.HandleFunc("/", HandleRequest)
 	http.HandleFunc("/api/Dashboard/upload", uploadHandler)
 	// http.HandleFunc("/api/Dashboard/upload", uploadHandler)
-
 	http.ListenAndServe(":80", nil)
-
 }
+
+var router = map[string]func(http.ResponseWriter, *http.Request){
+	"Dashboard": DashboardHandler,
+	// "/api/Dashboard/upload": UploadHandler,
+	// "/api/Users": UsersHandler,
+}
+
+func HandleRequest(rw http.ResponseWriter, request *http.Request) {
+	//разбиваем полученный запрос на массив строк по разделителю /
+	path := strings.Split(request.URL.Path, "/api/")
+	//берем первую по индексу строку и проверяем существует ли такой маршрут в router
+
+	// Ищем обработчик в карте по URL-пути
+	handler, exists := router[path[1]]
+	if exists {
+		// Вызываем соответствующую фнкцию из роутера
+		handler(rw, request)
+	} else {
+		log.Println("Не найден event => ", path[1])
+		// Обработка случая, когда маршрут не найден
+		http.NotFound(rw, request)
+	}
+}
+
+// func main() {
+// Установите сервер и маршрутизацию на HandleRequest
+// 	http.HandleFunc("/", HandleRequest)
+// 	http.ListenAndServe(":3000", nil)
+// }
 
 // func updateBD(rw http.ResponseWriter, request *http.Request) {
 // 	if request.Method == "POST" {
