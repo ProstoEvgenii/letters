@@ -26,10 +26,10 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
 		log.Println("=Params schema Error News_=", err)
 	}
-
 	var SendEmailResult string
 	if params.SendAll == "true" {
 		SendEmailResult = checkLogsAndSendEmail()
+		log.Println("=cd010b=", "тут")
 	}
 
 	usersCount, birthdaysListLen, todayLogsNumber := Dashboard()
@@ -53,6 +53,7 @@ func Dashboard() (int64, int, int) {
 	usersCount := CountDocuments()
 	birthdays_list := CreateBirthdaysSlice()
 	todayLogsNumber := getLogs()
+	// GetTemplate("test1")
 	return usersCount, len(birthdays_list), todayLogsNumber
 }
 
@@ -75,16 +76,22 @@ func CreateBirthdaysSlice() []Users {
 	return birthdays_list
 }
 
-func GetTemplate() string {
+func GetTemplate(templateName string) string {
 	filter := bson.M{
-		"name": "test1",
+		"name": templateName,
 	}
 	cursor := Find(filter, "templates")
 	var template []Templates
 	if err := cursor.All(context.TODO(), &template); err != nil {
 		log.Println("=8922b7=", err)
 	}
-	return template[0].IndexHTML
+	if len(template) > 0 {
+		return template[0].Name
+	} else {
+		log.Println("GetTemplate: template[0].Name не обнаружен")
+		return ""
+	}
+
 }
 
 func checkLogsAndSendEmail() string {
@@ -121,13 +128,17 @@ func SendEmail(user Users) {
 	subject := "C днем рождения!"
 
 	replacer := strings.NewReplacer("${first_name}", first_name, "${last_name}", last_name)
+
 	settings := GetSettings()
 	port, err := strconv.Atoi(settings.Port)
 	if err != nil {
 		fmt.Println("=SendEmail Ошибка форматирования строки в int=")
 	}
-	html := GetTemplate()
+	html := GetTemplate(settings.Template)
 	html = replacer.Replace(html)
+
+	fmt.Println("=950d99=", html)
+	fmt.Println("=ad2a17=", settings)
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", os.Getenv("EMAIL"))

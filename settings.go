@@ -19,7 +19,7 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 		uploadSettings(rw, request)
 	}
 	if request.Method == "GET" {
-		log.Println("=e1c06c=", "GET")
+		// log.Println("=e1c06c=", "GET")
 		settings := GetSettings()
 		response := SettingsUpload{
 			Template:   settings.Template,
@@ -27,7 +27,7 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 			Smtp:       settings.Smtp,
 			Port:       settings.Port,
 		}
-
+		GetSettings()
 		settingsJson, err := json.Marshal(response)
 		if err != nil {
 			fmt.Println("error:", err)
@@ -51,6 +51,7 @@ func GetSettings() SettingsUpload {
 	if err := cursor.All(context.TODO(), &settings); err != nil {
 		log.Println("=8922b7=", err)
 	}
+	log.Println("=499684=", settings)
 	return settings[0]
 
 }
