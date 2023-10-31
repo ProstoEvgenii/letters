@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -14,6 +15,7 @@ import (
 var collectionUsers *mongo.Collection
 var collectionLogs *mongo.Collection
 var collectionTemplates *mongo.Collection
+var collectionSettings *mongo.Collection
 
 func Connect() {
 	uri := "mongodb://" + os.Getenv("LOGIN") + ":" + os.Getenv("PASS") + "@" + os.Getenv("SERVER")
@@ -31,6 +33,8 @@ func Connect() {
 	collectionUsers = client.Database(os.Getenv("BASE")).Collection("users")
 	collectionLogs = client.Database(os.Getenv("BASE")).Collection("logs")
 	collectionTemplates = client.Database(os.Getenv("BASE")).Collection("templates")
+	collectionSettings = client.Database(os.Getenv("BASE")).Collection("settings")
+
 	return
 }
 
@@ -52,6 +56,15 @@ func InsertIfNotExists(document interface{}, filter, update primitive.M, collNam
 			log.Println("=InsertIfNotExists=", err)
 		}
 		return result
+
+	case "settings":
+		result, err := collectionSettings.UpdateOne(ctx, filter, update, opts)
+		if err != nil {
+			log.Println("=InsertIfNotExists=", err)
+		}
+		return result
+	default:
+		fmt.Println("=InsertIfNotExists=", "Не валидный case")
 	}
 	// if result.MatchedCount != 0 {
 	// 	fmt.Println("matched and replaced an existing document")
@@ -77,24 +90,31 @@ func Find(filter primitive.M, collName string) *mongo.Cursor {
 	case "users":
 		cursor, err := collectionUsers.Find(ctx, filter)
 		if err != nil {
-			log.Fatal(err)
+			log.Println("=Find=", err)
 		}
 		return cursor
 
 	case "logs":
 		cursor, err := collectionLogs.Find(ctx, filter)
 		if err != nil {
-			log.Fatal(err)
+			log.Println("=Find=", err)
 		}
 		return cursor
 	case "templates":
 		cursor, err := collectionTemplates.Find(ctx, filter)
 		if err != nil {
-			log.Fatal(err)
+			log.Println("=Find=", err)
 		}
 		return cursor
+	case "settings":
+		result, err := collectionSettings.Find(ctx, filter)
+		if err != nil {
+			log.Println("=Find=", err)
+		}
+		return result
+	default:
+		fmt.Println("=InsertIfNotExists=", "Не валидный case")
 	}
-
 	return nil
 }
 

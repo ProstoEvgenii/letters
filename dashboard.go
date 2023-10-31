@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -16,6 +18,10 @@ import (
 )
 
 func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
+	if request.Method == "POST" {
+		uploadUsers(rw, request)
+		return
+	}
 	params := new(Dashboard_Params)
 	if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
 		log.Println("=Params schema Error News_=", err)
@@ -27,7 +33,7 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	}
 
 	usersCount, birthdaysListLen, todayLogsNumber := Dashboard()
-	response := Response{
+	response := DashboardGetResponse{
 		DocumentsCount: usersCount,
 		CountBirtdays:  birthdaysListLen,
 		CountLogs:      todayLogsNumber,
@@ -38,17 +44,18 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		fmt.Println("error:", err)
 	}
-	// log.Println("=42687c=", string(itemCountJson))
 	rw.Write(itemCountJson)
+
 	return
 }
+
 func Dashboard() (int64, int, int) {
 	usersCount := CountDocuments()
 	birthdays_list := CreateBirthdaysSlice()
 	todayLogsNumber := getLogs()
-	// checkLogsAndSendEmail()
 	return usersCount, len(birthdays_list), todayLogsNumber
 }
+
 func CreateBirthdaysSlice() []Users {
 	today := time.Now()
 	filter := bson.M{}
@@ -107,19 +114,18 @@ func checkLogsAndSendEmail() string {
 	}
 
 }
+
 func SendEmail(user Users) {
 	first_name := user.FirstName
 	last_name := user.LastName
 	subject := "C днем рождения!"
 
 	replacer := strings.NewReplacer("${first_name}", first_name, "${last_name}", last_name)
-
-	// htmlBytes, err := os.ReadFile("index.html")
-	// if err != nil {
-	// 	// fmt.Println("Ошибка при чтении файла index.html:", err)
-	// 	log.Fatal()
-	// 	return
-	// }
+	settings := GetSettings()
+	port, err := strconv.Atoi(settings.Port)
+	if err != nil {
+		fmt.Println("=SendEmail Ошибка форматирования строки в int=")
+	}
 	html := GetTemplate()
 	html = replacer.Replace(html)
 
@@ -129,7 +135,7 @@ func SendEmail(user Users) {
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/html", html)
 
-	d := gomail.NewDialer("smtp.mail.ru", 465, os.Getenv("EMAIL"), os.Getenv("EMAIL_PASS"))
+	d := gomail.NewDialer(settings.Smtp, port, settings.EmailLogin, settings.EmailPass)
 	if err := d.DialAndSend(m); err != nil {
 
 		time.Sleep(10 * time.Second)
@@ -149,7 +155,6 @@ func getLogs() int {
 	if err := cursor.All(context.TODO(), &logs); err != nil {
 		log.Println("=8922b7=", err)
 	}
-	// log.Println("=Сегодня поздравлено=", logs)
 	return len(logs)
 
 }
@@ -169,6 +174,55 @@ func CreateLog(user Users) int64 {
 	}}
 	result := InsertIfNotExists(user, filter, update, "logs").UpsertedCount
 	return result
+}
+func uploadUsers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Max-Age", "15")
+	file, _, err := r.FormFile("jsonFile")
+	if err != nil {
+		http.Error(w, "Не удалось получить файл", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	fileBytes, err := io.ReadAll(file) // Читаем содержимое файла в срез байтов
+	if err != nil {
+		http.Error(w, "Не удалось прочитать файл", http.StatusInternalServerError)
+		return
+	}
+	var users []UsersUpload //  Форматитирую срез байтов в структуру
+	if err := json.Unmarshal(fileBytes, &users); err != nil {
+		fmt.Println("Ошибка при разборе JSON:", err)
+		return
+	}
+	var documentsInserted int64
+
+	for _, document := range users {
+		filter := bson.M{
+			"E-mail": document.Email,
+		}
+		dateBirth, _ := time.Parse("01/02/2006", document.Date_birth)
+		update := bson.M{"$setOnInsert": bson.M{
+			"Имя":           document.First_name,
+			"Фамилия":       document.Last_name,
+			"Отчество":      document.Middle_name,
+			"Дата рождения": dateBirth,
+			"E-mail":        document.Email,
+		}}
+		documentsInserted += InsertIfNotExists(document, filter, update, "users").UpsertedCount
+	}
+
+	response := DashboardPostResponse{
+		DocumentsInserted: documentsInserted,
+	}
+
+	usersAdded, err := json.Marshal(response)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(usersAdded)
 }
 
 // func FindLogs() []Users {

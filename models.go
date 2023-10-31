@@ -2,6 +2,7 @@ package main
 
 import "time"
 
+////=======DashBoard
 type Users struct {
 	FirstName   string    `bson:"Имя"`
 	LastName    string    `bson:"Фамилия"`
@@ -26,12 +27,14 @@ type Dashboard_Params struct {
 	SendAll string `json:"sendAll"`
 }
 
-type Response struct {
-	DocumentsCount    int64  `json:"documentsCount"`
-	CountBirtdays     int    `json:"countBirtdays"`
-	CountLogs         int    `json:"countLogs"`
-	DocumentsInserted int64  `json:"documentsInserted"`
-	SendEmail         string `json:"sendEmailresult"`
+type DashboardGetResponse struct {
+	DocumentsCount int64  `json:"documentsCount"`
+	CountBirtdays  int    `json:"countBirtdays"`
+	CountLogs      int    `json:"countLogs"`
+	SendEmail      string `json:"sendEmailresult"`
+}
+type DashboardPostResponse struct {
+	DocumentsInserted int64 `json:"documentsInserted"`
 }
 type UsersUpload struct {
 	Last_name   string `json:"Фамилия" bson:"Фамилия"`
@@ -41,10 +44,21 @@ type UsersUpload struct {
 	Email       string `json:"E-mail" bson:"E-mail"`
 }
 
-type Data struct {
-	Last_name   string `json:"Фамилия" bson:"Фамилия"`
-	First_name  string `json:"Имя" bson:"Имя"`
-	Middle_name string `json:"Отчество" bson:"Отчество"`
-	Date_birth  string `json:"Дата рождения" bson:"Дата рождения"`
-	Email       string `json:"E-mail" bson:"E-mail"`
+////=======Settings
+type SettingsUpload struct {
+	Template   string `json:"template" bson:"template"`
+	EmailLogin string `json:"emailLogin" bson:"emailLogin"`
+	EmailPass  string `json:"emailPass" bson:"emailPass"`
+	Smtp       string `json:"smtp" bson:"smtp"`
+	Port       string `json:"port" bson:"port"`
 }
+
+
+////===========================
+// type Data struct {
+// 	Last_name   string `json:"Фамилия" bson:"Фамилия"`
+// 	First_name  string `json:"Имя" bson:"Имя"`
+// 	Middle_name string `json:"Отчество" bson:"Отчество"`
+// 	Date_birth  string `json:"Дата рождения" bson:"Дата рождения"`
+// 	Email       string `json:"E-mail" bson:"E-mail"`
+// }
