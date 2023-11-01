@@ -208,13 +208,14 @@ func uploadUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var documentsInserted int64
+	var documentsModified int64
 
 	for _, document := range users {
 		filter := bson.M{
 			"E-mail": document.Email,
 		}
 		dateBirth, _ := time.Parse("01/02/2006", document.Date_birth)
-		update := bson.M{"$setOnInsert": bson.M{
+		update := bson.M{"$set": bson.M{
 			"Имя":           document.First_name,
 			"Фамилия":       document.Last_name,
 			"Отчество":      document.Middle_name,
@@ -222,10 +223,13 @@ func uploadUsers(w http.ResponseWriter, r *http.Request) {
 			"E-mail":        document.Email,
 		}}
 		documentsInserted += InsertIfNotExists(document, filter, update, "users").UpsertedCount
+		documentsModified += InsertIfNotExists(document, filter, update, "users").ModifiedCount
 	}
 
 	response := DashboardPostResponse{
+		Err:               "Ok",
 		DocumentsInserted: documentsInserted,
+		DocumentsModified: documentsModified,
 	}
 
 	usersAdded, err := json.Marshal(response)

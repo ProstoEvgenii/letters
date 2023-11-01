@@ -34,7 +34,9 @@ type DashboardGetResponse struct {
 	SendEmail      string `json:"sendEmailresult"`
 }
 type DashboardPostResponse struct {
-	DocumentsInserted int64 `json:"documentsInserted"`
+	Err               string `json:"err"`
+	DocumentsInserted int64  `json:"documentsInserted"`
+	DocumentsModified int64  `json:"documentsModified"`
 }
 type UsersUpload struct {
 	Last_name   string `json:"Фамилия" bson:"Фамилия"`
@@ -52,7 +54,6 @@ type SettingsUpload struct {
 	Smtp       string `json:"smtp" bson:"smtp"`
 	Port       string `json:"port" bson:"port"`
 }
-
 
 ////===========================
 // type Data struct {

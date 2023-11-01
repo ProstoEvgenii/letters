@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -19,7 +18,6 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 		uploadSettings(rw, request)
 	}
 	if request.Method == "GET" {
-		// log.Println("=e1c06c=", "GET")
 		settings := GetSettings()
 		response := SettingsUpload{
 			Template:   settings.Template,
@@ -27,7 +25,6 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 			Smtp:       settings.Smtp,
 			Port:       settings.Port,
 		}
-		GetSettings()
 		settingsJson, err := json.Marshal(response)
 		if err != nil {
 			fmt.Println("error:", err)
@@ -44,17 +41,15 @@ func GetSettings() SettingsUpload {
 	filter := bson.M{
 		"_id": objectId,
 	}
-	cursor := Find(filter, "settings")
+	cursor := FindOne(filter, "settings")
 
-	var settings []SettingsUpload
+	var settings SettingsUpload
+	cursor.Decode(&settings)
 
-	if err := cursor.All(context.TODO(), &settings); err != nil {
-		log.Println("=8922b7=", err)
-	}
-	log.Println("=499684=", settings)
-	return settings[0]
-
+	return settings
 }
+
+
 func uploadSettings(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	rw.Header().Set("Access-Control-Allow-Origin", "*")

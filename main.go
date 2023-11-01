@@ -2,25 +2,33 @@ package main
 
 import (
 	"log"
-	"os"
 	"time"
 
 	"github.com/joho/godotenv"
-	"gopkg.in/gomail.v2"
 )
 
 func main() {
-	files_name := []string{"index.html", ".env", "users.json"}
-	CheckFilesAndConnectToEmail(files_name)
-	// records := readJson("users.json")
-	// findBirthdays(records)
-
+	if err := godotenv.Load(".env"); err != nil {
+		log.Println("Файл .env не найден")
+		time.Sleep(10 * time.Second)
+		log.Fatal()
+	}
 	Connect()
-	// GetTemplate()
-	// Dashboard()
 	Start()
+
 }
 
+// func main() {
+// files_name := []string{"index.html", ".env", "users.json"}
+// CheckFilesAndConnectToEmail(files_name)
+// records := readJson("users.json")
+// findBirthdays(records)
+
+// Connect()
+// GetTemplate()
+// Dashboard()
+// Start()
+// }
 // func findBirthdays(records []Data) {
 // 	todayMonthDate := time.Now().Format("01/02")
 // 	foundBirthday := false
@@ -38,34 +46,34 @@ func main() {
 // 	}
 // }
 
-func CheckFilesAndConnectToEmail(files_name []string) {
-	// fmt.Println("Проверяю файлы в папке...")
+// func CheckFilesAndConnectToEmail(files_name []string) {
+// fmt.Println("Проверяю файлы в папке...")
 
-	// for _, item := range files_name {
-	// 	if _, err := os.Stat(item); os.IsNotExist(err) {
-	// 		fmt.Printf("Файл %s не найден в корне проекта.\n", item)
-	// 		time.Sleep(10 * time.Second)
-	// 		log.Fatal()
-	// 	}
-	// }
+// for _, item := range files_name {
+// 	if _, err := os.Stat(item); os.IsNotExist(err) {
+// 		fmt.Printf("Файл %s не найден в корне проекта.\n", item)
+// 		time.Sleep(10 * time.Second)
+// 		log.Fatal()
+// 	}
+// }
 
-	// log.Println("Все файлы присутствуют.")
+// log.Println("Все файлы присутствуют.")
 
-	if err := godotenv.Load(".env"); err != nil {
-		log.Println("Файл .env не найден")
-		time.Sleep(10 * time.Second)
-		log.Fatal()
-	}
+// if err := godotenv.Load(".env"); err != nil {
+// 	log.Println("Файл .env не найден")
+// 	time.Sleep(10 * time.Second)
+// 	log.Fatal()
+// }
 
-	d := gomail.NewDialer("smtp.mail.ru", 465, os.Getenv("EMAIL"), os.Getenv("EMAIL_PASS"))
-	if err := d.DialAndSend(); err != nil {
-		log.Println("Не удалось отправить установить соединение с почтовым ящиком. Убедитесь ,что E-mail и пароль в файле .env указаны верно")
-		time.Sleep(10 * time.Second)
-		log.Fatal()
-	} else {
-		log.Println("Соединение с почтовым ящиком установлено.")
-	}
-}
+// d := gomail.NewDialer("smtp.mail.ru", 465, os.Getenv("EMAIL"), os.Getenv("EMAIL_PASS"))
+// if err := d.DialAndSend(); err != nil {
+// 	log.Println("Не удалось отправить установить соединение с почтовым ящиком. Убедитесь ,что E-mail и пароль в файле .env указаны верно")
+// 	time.Sleep(10 * time.Second)
+// 	log.Fatal()
+// } else {
+// 	log.Println("Соединение с почтовым ящиком установлено.")
+// }
+// }
 
 // func readJson(jsonName string) []Data {
 // 	file, err := os.Open(jsonName)

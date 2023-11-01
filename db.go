@@ -118,6 +118,24 @@ func Find(filter primitive.M, collName string) *mongo.Cursor {
 	return nil
 }
 
+func FindOne(filter primitive.M, collName string) *mongo.SingleResult {
+	ctx := context.TODO()
+	switch collName {
+	case "settings":
+		cursor := collectionUsers.FindOne(ctx, filter)
+		if cursor.Err() != nil {
+			fmt.Println("=FindOne Error=", cursor.Err())
+		}
+		if cursor.Err() == mongo.ErrNoDocuments {
+			log.Println("=settings=", "Документ не найден")
+		}
+		return cursor
+	default:
+		fmt.Println("=InsertIfNotExists=", "Не валидный case")
+	}
+	return nil
+}
+
 // func Find(filter, sort bson.M, limit int64, collName string) (*mongo.Cursor, error) {
 // 	findOptions := options.Find()
 // 	findOptions.SetSort(sort)
