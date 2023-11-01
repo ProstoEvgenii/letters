@@ -121,13 +121,17 @@ func Find(filter primitive.M, collName string) *mongo.Cursor {
 func FindOne(filter primitive.M, collName string) *mongo.SingleResult {
 	ctx := context.TODO()
 	switch collName {
+	case "templates":
+		cursor := collectionTemplates.FindOne(ctx, filter)
+		//
+		// if cursor.Err() == mongo.ErrNoDocuments {
+		// 	log.Println("=settings=", "Документ не найден")
+		// }
+		return cursor
 	case "settings":
 		cursor := collectionUsers.FindOne(ctx, filter)
 		if cursor.Err() != nil {
 			fmt.Println("=FindOne Error=", cursor.Err())
-		}
-		if cursor.Err() == mongo.ErrNoDocuments {
-			log.Println("=settings=", "Документ не найден")
 		}
 		return cursor
 	default:

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"time"
 
@@ -45,10 +44,8 @@ func GetSettings() SettingsUpload {
 
 	var settings SettingsUpload
 	cursor.Decode(&settings)
-
 	return settings
 }
-
 
 func uploadSettings(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -66,7 +63,6 @@ func uploadSettings(rw http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	log.Println("=5cd991=", settingsData)
 	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
 	objectId, err := primitive.ObjectIDFromHex("6540ff760fc1b4b7a36a287b")
 	filter := bson.M{
@@ -81,5 +77,18 @@ func uploadSettings(rw http.ResponseWriter, request *http.Request) {
 		"dateCreate": currentDate,
 	}}
 	settingInserted := InsertIfNotExists(settingsData, filter, update, "settings")
-	log.Println("=ModifiedCount=", settingInserted.ModifiedCount, "=UpsertedCount=", settingInserted.UpsertedCount, "=UpsertedCount=", settingInserted.UpsertedID)
+
+	response := DashboardPostResponse{
+		Err:               "Ok",
+		DocumentsInserted: settingInserted.UpsertedCount,
+		DocumentsModified: settingInserted.ModifiedCount,
+	}
+
+	settingsAdded, err := json.Marshal(response)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	rw.WriteHeader(http.StatusOK)
+	rw.Write(settingsAdded)
+	// log.Println("=ModifiedCount=", settingInserted.ModifiedCount, "=UpsertedCount=", settingInserted.UpsertedCount)
 }

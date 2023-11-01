@@ -29,7 +29,6 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	var SendEmailResult string
 	if params.SendAll == "true" {
 		SendEmailResult = checkLogsAndSendEmail()
-		log.Println("=cd010b=", "тут")
 	}
 
 	usersCount, birthdaysListLen, todayLogsNumber := Dashboard()
@@ -76,21 +75,23 @@ func CreateBirthdaysSlice() []Users {
 	return birthdays_list
 }
 
-func GetTemplate(templateName string) string {
+func GetTemplate(templateName string) *string {
 	filter := bson.M{
 		"name": templateName,
 	}
-	cursor := Find(filter, "templates")
-	var template []Templates
-	if err := cursor.All(context.TODO(), &template); err != nil {
-		log.Println("=8922b7=", err)
+
+	cursor := FindOne(filter, "templates")
+
+	err := nil
+	if cursor.Err() != nil {
+		err = "Нет документов"
 	}
-	if len(template) > 0 {
-		return template[0].Name
-	} else {
-		log.Println("GetTemplate: template[0].Name не обнаружен")
-		return ""
-	}
+
+	var template Templates
+	cursor.Decode(&template)
+	// log.Println("=f360d2=", template)
+
+	return &template.IndexHTML
 
 }
 
@@ -130,6 +131,10 @@ func SendEmail(user Users) {
 	replacer := strings.NewReplacer("${first_name}", first_name, "${last_name}", last_name)
 
 	settings := GetSettings()
+	if settings.EmailLogin == "" {
+		log.Println("=82842e=", "Настроек нет")
+		return
+	}
 	port, err := strconv.Atoi(settings.Port)
 	if err != nil {
 		fmt.Println("=SendEmail Ошибка форматирования строки в int=")
