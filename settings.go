@@ -33,17 +33,13 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 	}
 }
 func GetSettings() SettingsUpload {
-	objectId, err := primitive.ObjectIDFromHex("6540ff760fc1b4b7a36a287b")
-	if err != nil {
-		fmt.Println("=getSettings Ошибка преобразования ID=", err)
-	}
-	filter := bson.M{
-		"_id": objectId,
-	}
-	cursor := FindOne(filter, "settings")
+	filter := bson.M{}
 
 	var settings SettingsUpload
+
+	cursor := FindOne(filter, "settings")
 	cursor.Decode(&settings)
+
 	return settings
 }
 

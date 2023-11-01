@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -75,90 +74,93 @@ func CreateBirthdaysSlice() []Users {
 	return birthdays_list
 }
 
-func GetTemplate(templateName string) *string {
+func GetTemplate(templateName string) string {
 	filter := bson.M{
 		"name": templateName,
 	}
 
 	cursor := FindOne(filter, "templates")
 
-	err := nil
 	if cursor.Err() != nil {
-		err = "Нет документов"
+		log.Println("=ce7969=", cursor.Err())
+		return ""
 	}
-
 	var template Templates
 	cursor.Decode(&template)
-	// log.Println("=f360d2=", template)
 
-	return &template.IndexHTML
+	return template.IndexHTML
 
 }
 
 func checkLogsAndSendEmail() string {
-	var result string
 	birthdays_list := CreateBirthdaysSlice()
 	if len(birthdays_list) == 0 {
-		result = "Нет Дней рождений сегодня"
-		return result
+		return "Нет Дней рождений сегодня"
 	}
 
 	emailSent := 0
+
+	settings := GetSettings()
+	if settings.EmailLogin == "" || settings.EmailPass == "" || settings.Smtp == "" || settings.Port == "" || settings.Template == "" {
+		log.Println("=82842e=", "Настройки не верны либо отсутствуют.")
+		return "Настройки не верны либо отсутствуют."
+	}
+
+	html := GetTemplate(settings.Template)
+	if html == "" {
+		return fmt.Sprintf("Шаблона %s не существует", settings.Template)
+	}
 
 	for _, user := range birthdays_list {
 		result := CreateLog(user)
 		if result != 0 {
 			//Если результат создания лога == 0 ,значит лог с таким email существует и поздравлять его не нужно
-			SendEmail(user)
+			err := SendEmail(user, settings, html)
+			if err != "ok" {
+				return err
+			}
+
 			emailSent += 1
 		}
 	}
 	if emailSent == 0 {
-		result = "Сегодня все поздравлены"
-		return result
+		return "Сегодня все поздравлены"
 	} else {
-		result = fmt.Sprintf("Поздравлено %d пользователей", emailSent)
-		return result
+		log.Printf("Поздравлено %d пользователей", emailSent)
+		return fmt.Sprintf("Поздравлено %d пользователей", emailSent)
 	}
 
 }
 
-func SendEmail(user Users) {
+func SendEmail(user Users, settings SettingsUpload, html string) string {
 	first_name := user.FirstName
 	last_name := user.LastName
 	subject := "C днем рождения!"
 
 	replacer := strings.NewReplacer("${first_name}", first_name, "${last_name}", last_name)
 
-	settings := GetSettings()
-	if settings.EmailLogin == "" {
-		log.Println("=82842e=", "Настроек нет")
-		return
-	}
 	port, err := strconv.Atoi(settings.Port)
 	if err != nil {
-		fmt.Println("=SendEmail Ошибка форматирования строки в int=")
+		fmt.Println("SendEmail Ошибка форматирования строки в int")
+		return "Ошибка"
 	}
-	html := GetTemplate(settings.Template)
+
 	html = replacer.Replace(html)
 
-	fmt.Println("=950d99=", html)
-	fmt.Println("=ad2a17=", settings)
 
 	m := gomail.NewMessage()
-	m.SetHeader("From", os.Getenv("EMAIL"))
+	m.SetHeader("From", settings.EmailLogin)
 	m.SetHeader("To", user.Email)
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/html", html)
 
 	d := gomail.NewDialer(settings.Smtp, port, settings.EmailLogin, settings.EmailPass)
 	if err := d.DialAndSend(m); err != nil {
-
-		time.Sleep(10 * time.Second)
-		log.Fatal()
+		log.Println("=79fc04=", err)
+		return "Ошибка при отправки сообщения"
 	}
 	fmt.Printf("Поздравление отправлено:%s", user.Email)
-	time.Sleep(10 * time.Second)
+	return "ok"
 }
 
 func getLogs() int {

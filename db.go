@@ -123,21 +123,15 @@ func FindOne(filter primitive.M, collName string) *mongo.SingleResult {
 	switch collName {
 	case "templates":
 		cursor := collectionTemplates.FindOne(ctx, filter)
-		//
-		// if cursor.Err() == mongo.ErrNoDocuments {
-		// 	log.Println("=settings=", "Документ не найден")
-		// }
 		return cursor
 	case "settings":
-		cursor := collectionUsers.FindOne(ctx, filter)
-		if cursor.Err() != nil {
-			fmt.Println("=FindOne Error=", cursor.Err())
-		}
+		cursor := collectionSettings.FindOne(ctx, filter)
 		return cursor
 	default:
 		fmt.Println("=InsertIfNotExists=", "Не валидный case")
+		return nil
 	}
-	return nil
+
 }
 
 // func Find(filter, sort bson.M, limit int64, collName string) (*mongo.Cursor, error) {

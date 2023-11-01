@@ -34,6 +34,10 @@ func HandleRequest(rw http.ResponseWriter, request *http.Request) {
 	}
 }
 
+func anyPage(rw http.ResponseWriter, request *http.Request) {
+	fmt.Fprintf(rw, "Hello")
+}
+
 // func main() {
 // Установите сервер и маршрутизацию на HandleRequest
 // 	http.HandleFunc("/", HandleRequest)
@@ -159,7 +163,3 @@ func HandleRequest(rw http.ResponseWriter, request *http.Request) {
 // 		return
 // 	}
 // }
-
-func anyPage(rw http.ResponseWriter, request *http.Request) {
-	fmt.Fprintf(rw, "Hello")
-}
