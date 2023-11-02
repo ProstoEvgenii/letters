@@ -24,14 +24,15 @@ type Logs struct {
 	DateCreate  time.Time `bson:"dateCreate"`
 }
 type Dashboard_Params struct {
-	SendAll string `json:"sendAll"`
+	SendTo string `json:"sendTo"`
 }
 
 type DashboardGetResponse struct {
-	DocumentsCount int64  `json:"documentsCount"`
-	CountBirtdays  int    `json:"countBirtdays"`
-	CountLogs      int    `json:"countLogs"`
-	SendEmail      string `json:"sendEmailresult"`
+	UsersCount    int64  `json:"usersCount"`
+	LogsCount     int64  `json:"logsCount"`
+	CountBirtdays int    `json:"countBirtdays"`
+	CountLogs     int    `json:"todaySent"`
+	SendEmail     string `json:"sendEmailresult"`
 }
 type DashboardPostResponse struct {
 	Err               string `json:"err"`

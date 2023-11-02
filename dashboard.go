@@ -26,16 +26,20 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 		log.Println("=Params schema Error News_=", err)
 	}
 	var SendEmailResult string
-	if params.SendAll == "true" {
-		SendEmailResult = checkLogsAndSendEmail()
+	if params.SendTo != "" {
+		var userTest Users
+		userTest.FirstName, userTest.LastName, userTest.Email = "Иван", "Иванов", params.SendTo
+		log.Println("=52316b=", userTest)
+		SendEmailResult = SendTest(userTest)
 	}
 
-	usersCount, birthdaysListLen, todayLogsNumber := Dashboard()
+	usersCount, logsCount, birthdaysListLen, todayLogsNumber := Dashboard()
 	response := DashboardGetResponse{
-		DocumentsCount: usersCount,
-		CountBirtdays:  birthdaysListLen,
-		CountLogs:      todayLogsNumber,
-		SendEmail:      SendEmailResult,
+		UsersCount:    usersCount,
+		LogsCount:     logsCount,
+		CountBirtdays: birthdaysListLen,
+		CountLogs:     todayLogsNumber,
+		SendEmail:     SendEmailResult,
 	}
 
 	itemCountJson, err := json.Marshal(response)
@@ -47,13 +51,29 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	return
 }
 
-func Dashboard() (int64, int, int) {
-	usersCount := CountDocuments()
+func Dashboard() (int64, int64, int, int) {
+	usersCount := CountDocuments("users")
+	logsCount := CountDocuments("logs")
+
 	birthdays_list := CreateBirthdaysSlice()
 	todayLogsNumber := getLogs()
 	// GetTemplate("test1")
-	return usersCount, len(birthdays_list), todayLogsNumber
+	return usersCount, logsCount, len(birthdays_list), todayLogsNumber
 }
+
+// func CheckSettingsAndEmail() string{
+// 	settings := GetSettings()
+// 	if settings.EmailLogin == "" || settings.EmailPass == "" || settings.Smtp == "" || settings.Port == "" || settings.Template == "" {
+// 		log.Println("=82842e=", "Настройки не верны либо отсутствуют.")
+// 		return "Настройки не верны либо отсутствуют."
+// 	}
+
+// 	html := GetTemplate(settings.Template)
+// 	if html == "" {
+// 		return fmt.Sprintf("Шаблона %s не существует", settings.Template)
+// 	}
+// 	return "ok"
+// }
 
 func CreateBirthdaysSlice() []Users {
 	today := time.Now()
@@ -92,6 +112,25 @@ func GetTemplate(templateName string) string {
 
 }
 
+func SendTest(user Users) string {
+	settings := GetSettings()
+	if settings.EmailLogin == "" || settings.EmailPass == "" || settings.Smtp == "" || settings.Port == "" || settings.Template == "" {
+		log.Println("=82842e=", "Настройки не верны либо отсутствуют.")
+		return "Настройки не верны либо отсутствуют."
+	}
+
+	html := GetTemplate(settings.Template)
+	if html == "" {
+		return fmt.Sprintf("Шаблона %s не существует", settings.Template)
+	}
+
+	err := SendEmail(user, settings, html)
+	if err != "ok" {
+		return err
+	}
+
+	return fmt.Sprintf("Пользователь %s поздравлен", user.Email)
+}
 func checkLogsAndSendEmail() string {
 	birthdays_list := CreateBirthdaysSlice()
 	if len(birthdays_list) == 0 {
@@ -135,7 +174,7 @@ func checkLogsAndSendEmail() string {
 func SendEmail(user Users, settings SettingsUpload, html string) string {
 	first_name := user.FirstName
 	last_name := user.LastName
-	subject := "C днем рождения!"
+	subject := "C днем рождения! От главы администрации."
 
 	replacer := strings.NewReplacer("${first_name}", first_name, "${last_name}", last_name)
 
@@ -147,7 +186,6 @@ func SendEmail(user Users, settings SettingsUpload, html string) string {
 
 	html = replacer.Replace(html)
 
-
 	m := gomail.NewMessage()
 	m.SetHeader("From", settings.EmailLogin)
 	m.SetHeader("To", user.Email)
@@ -156,8 +194,8 @@ func SendEmail(user Users, settings SettingsUpload, html string) string {
 
 	d := gomail.NewDialer(settings.Smtp, port, settings.EmailLogin, settings.EmailPass)
 	if err := d.DialAndSend(m); err != nil {
-		log.Println("=79fc04=", err)
-		return "Ошибка при отправки сообщения"
+		log.Println("=SendEmail79fc04 Отправка письма=", err)
+		return "Ошибка при отправкe сообщения"
 	}
 	fmt.Printf("Поздравление отправлено:%s", user.Email)
 	return "ok"

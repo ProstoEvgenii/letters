@@ -75,13 +75,34 @@ func InsertIfNotExists(document interface{}, filter, update primitive.M, collNam
 	return nil
 }
 
-func CountDocuments() int64 {
+func CountDocuments(collName string) int64 {
+	ctx := context.TODO()
+	switch collName {
+	case "users":
+		itemCount, err := collectionUsers.CountDocuments(ctx, bson.M{})
+		if err != nil {
+			log.Println("=2671f1=", err)
+		}
+		return itemCount
 
-	itemCount, err := collectionUsers.CountDocuments(context.TODO(), bson.M{})
-	if err != nil {
-		log.Println("=2671f1=", err)
+	case "logs":
+		itemCount, err := collectionLogs.CountDocuments(ctx, bson.M{})
+		if err != nil {
+			log.Println("=2671f1=", err)
+		}
+		return itemCount
+	case "settings":
+		itemCount, err := collectionUsers.CountDocuments(ctx, bson.M{})
+		if err != nil {
+			log.Println("=2671f1=", err)
+		}
+		return itemCount
+	default:
+		fmt.Println("=CountDocuments=", "Не валидный case")
+
 	}
-	return itemCount
+	return 0
+
 }
 
 func Find(filter primitive.M, collName string) *mongo.Cursor {

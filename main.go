@@ -46,7 +46,17 @@ func main() {
 // 	}
 // }
 
-// func CheckFilesAndConnectToEmail(files_name []string) {
+// func CheckConnectionToEmail() {
+
+// 	d := gomail.NewDialer("smtp.mail.ru", 465, os.Getenv("EMAIL"), os.Getenv("EMAIL_PASS"))
+// 	if err := d.DialAndSend(); err != nil {
+// 		log.Println("Не удалось отправить установить соединение с почтовым ящиком. Убедитесь ,что E-mail и пароль в файле .env указаны верно")
+// 		time.Sleep(10 * time.Second)
+// 		log.Fatal()
+// 	} else {
+// 		log.Println("Соединение с почтовым ящиком установлено.")
+// 	}
+// }
 // fmt.Println("Проверяю файлы в папке...")
 
 // for _, item := range files_name {
@@ -65,14 +75,14 @@ func main() {
 // 	log.Fatal()
 // }
 
-// d := gomail.NewDialer("smtp.mail.ru", 465, os.Getenv("EMAIL"), os.Getenv("EMAIL_PASS"))
-// if err := d.DialAndSend(); err != nil {
-// 	log.Println("Не удалось отправить установить соединение с почтовым ящиком. Убедитесь ,что E-mail и пароль в файле .env указаны верно")
-// 	time.Sleep(10 * time.Second)
-// 	log.Fatal()
-// } else {
-// 	log.Println("Соединение с почтовым ящиком установлено.")
-// }
+// 	d := gomail.NewDialer("smtp.mail.ru", 465, os.Getenv("EMAIL"), os.Getenv("EMAIL_PASS"))
+// 	if err := d.DialAndSend(); err != nil {
+// 		log.Println("Не удалось отправить установить соединение с почтовым ящиком. Убедитесь ,что E-mail и пароль в файле .env указаны верно")
+// 		time.Sleep(10 * time.Second)
+// 		log.Fatal()
+// 	} else {
+// 		log.Println("Соединение с почтовым ящиком установлено.")
+// 	}
 // }
 
 // func readJson(jsonName string) []Data {
