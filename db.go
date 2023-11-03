@@ -16,6 +16,7 @@ var collectionUsers *mongo.Collection
 var collectionLogs *mongo.Collection
 var collectionTemplates *mongo.Collection
 var collectionSettings *mongo.Collection
+var dataBase *mongo.Database
 
 func Connect() {
 	uri := "mongodb://" + os.Getenv("LOGIN") + ":" + os.Getenv("PASS") + "@" + os.Getenv("SERVER")
@@ -30,6 +31,8 @@ func Connect() {
 	}
 
 	log.Println("База данных подключена упешно!")
+
+	dataBase = client.Database(os.Getenv("BASE"))
 	collectionUsers = client.Database(os.Getenv("BASE")).Collection("users")
 	collectionLogs = client.Database(os.Getenv("BASE")).Collection("logs")
 	collectionTemplates = client.Database(os.Getenv("BASE")).Collection("templates")
@@ -39,40 +42,20 @@ func Connect() {
 }
 
 func InsertIfNotExists(document interface{}, filter, update primitive.M, collName string) *mongo.UpdateResult {
-
 	opts := options.Update().SetUpsert(true)
 	ctx := context.TODO()
-	switch collName {
-	case "users":
-		result, err := collectionUsers.UpdateOne(ctx, filter, update, opts)
-		if err != nil {
-			log.Println("=InsertIfNotExists=", err)
-		}
-		return result
-
-	case "logs":
-		result, err := collectionLogs.UpdateOne(ctx, filter, update, opts)
-		if err != nil {
-			log.Println("=InsertIfNotExists=", err)
-		}
-		return result
-
-	case "settings":
-		result, err := collectionSettings.UpdateOne(ctx, filter, update, opts)
-		if err != nil {
-			log.Println("=InsertIfNotExists=", err)
-		}
-		return result
-	default:
-		fmt.Println("=InsertIfNotExists=", "Не валидный case")
+	result, err := dataBase.Collection(collName).UpdateOne(ctx, filter, update, opts)
+	if err != nil {
+		log.Println("=InsertIfNotExists=", err)
 	}
+	return result
 	// if result.MatchedCount != 0 {
 	// 	fmt.Println("matched and replaced an existing document")
 	// }
 	// if result.UpsertedCount != 0 {
 	// 	fmt.Printf("inserted a new document with ID %v\n", result.UpsertedID)
 	// }
-	return nil
+
 }
 
 func CountDocuments(collName string) int64 {
@@ -107,52 +90,17 @@ func CountDocuments(collName string) int64 {
 
 func Find(filter primitive.M, collName string) *mongo.Cursor {
 	ctx := context.TODO()
-	switch collName {
-	case "users":
-		cursor, err := collectionUsers.Find(ctx, filter)
-		if err != nil {
-			log.Println("=Find=", err)
-		}
-		return cursor
-
-	case "logs":
-		cursor, err := collectionLogs.Find(ctx, filter)
-		if err != nil {
-			log.Println("=Find=", err)
-		}
-		return cursor
-	case "templates":
-		cursor, err := collectionTemplates.Find(ctx, filter)
-		if err != nil {
-			log.Println("=Find=", err)
-		}
-		return cursor
-	case "settings":
-		result, err := collectionSettings.Find(ctx, filter)
-		if err != nil {
-			log.Println("=Find=", err)
-		}
-		return result
-	default:
-		fmt.Println("=InsertIfNotExists=", "Не валидный case")
+	cursor, err := dataBase.Collection(collName).Find(ctx, filter)
+	if err != nil {
+		log.Println("=Find=", err)
 	}
-	return nil
+	return cursor
 }
 
 func FindOne(filter primitive.M, collName string) *mongo.SingleResult {
 	ctx := context.TODO()
-	switch collName {
-	case "templates":
-		cursor := collectionTemplates.FindOne(ctx, filter)
-		return cursor
-	case "settings":
-		cursor := collectionSettings.FindOne(ctx, filter)
-		return cursor
-	default:
-		fmt.Println("=InsertIfNotExists=", "Не валидный case")
-		return nil
-	}
-
+	cursor := dataBase.Collection(collName).FindOne(ctx, filter)
+	return cursor
 }
 
 // func Find(filter, sort bson.M, limit int64, collName string) (*mongo.Cursor, error) {

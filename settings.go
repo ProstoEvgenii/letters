@@ -103,7 +103,6 @@ func CheckConnectionToEmail(settingsData SettingsUpload) string {
 	}
 	log.Println("Соединение с почтовым ящиком установлено.")
 	return "Соединение с почтовым ящиком установлено."
-
 }
 
 func uploadSettings(rw http.ResponseWriter, request *http.Request) DashboardPostResponse {

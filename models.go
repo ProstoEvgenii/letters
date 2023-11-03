@@ -24,7 +24,8 @@ type Logs struct {
 	DateCreate  time.Time `bson:"dateCreate"`
 }
 type Dashboard_Params struct {
-	SendTo string `json:"sendTo"`
+	SendTo     string `json:"sendTo"`
+	SendAutoAt int    `json:"sendAutoAt"`
 }
 
 type DashboardGetResponse struct {
@@ -33,6 +34,7 @@ type DashboardGetResponse struct {
 	CountBirtdays int    `json:"countBirtdays"`
 	CountLogs     int    `json:"todaySent"`
 	SendEmail     string `json:"sendEmailresult"`
+	SendAutoAt    int    `json:"sendAutoAt"`
 }
 type DashboardPostResponse struct {
 	Err               string `json:"err"`
@@ -47,6 +49,11 @@ type UsersUpload struct {
 	Email       string `json:"E-mail" bson:"E-mail"`
 }
 
+type IsSent struct {
+	Date   time.Time `bson:"date"`
+	IsSent bool      `bson:"isSent"`
+}
+
 ////=======Settings
 type SettingsUpload struct {
 	Template   string `json:"template" bson:"template"`
@@ -54,7 +61,33 @@ type SettingsUpload struct {
 	EmailPass  string `json:"emailPass" bson:"emailPass"`
 	Smtp       string `json:"smtp" bson:"smtp"`
 	Port       string `json:"port" bson:"port"`
+	SendAutoAt int    `bson:"sendAutoAt"`
 }
+
+///========DataBase
+
+type UserRecord struct {
+	User UsersUpload `json:"user"`
+}
+type GetDataBaseResponse struct {
+	Records    []Users `json:"records"`
+	UsersCount int64   `json:"usersCount"`
+}
+
+//======History
+
+type GetHistoryResponse struct {
+	Records            []Logs `json:"records"`
+	LogsCount          int64   `json:"logsCount"`
+	TodayLogsCount     int     `json:"todayLgsCount"`
+	TommorowLogsCount  int     `json:"tommorowLogsCount"`
+	YesterdayLogsCount int     `json:"yesterdayLogsCount"`
+}
+
+// type GetDataBaseResponse struct {
+// 	Records    []byte
+// 	UsersCount int64
+// }
 
 ////===========================
 // type Data struct {

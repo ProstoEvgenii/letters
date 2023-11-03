@@ -13,6 +13,7 @@ import (
 
 	"github.com/gorilla/schema"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"gopkg.in/gomail.v2"
 )
 
@@ -29,17 +30,30 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	if params.SendTo != "" {
 		var userTest Users
 		userTest.FirstName, userTest.LastName, userTest.Email = "Иван", "Иванов", params.SendTo
-		log.Println("=52316b=", userTest)
 		SendEmailResult = SendTest(userTest)
 	}
+	if params.SendAutoAt != 0 {
+		var settingsData SettingsUpload
+		objectId, _ := primitive.ObjectIDFromHex("6540ff760fc1b4b7a36a287b")
+		filter := bson.M{
+			"_id": objectId,
+		}
+		update := bson.M{"$set": bson.M{
+			"sendAutoAt": params.SendAutoAt,
+		}}
 
-	usersCount, logsCount, birthdaysListLen, todayLogsNumber := Dashboard()
+		InsertIfNotExists(settingsData, filter, update, "settings")
+
+	}
+
+	usersCount, logsCount, birthdaysListLen, todayLogsNumber, sendAutoAt := Dashboard()
 	response := DashboardGetResponse{
 		UsersCount:    usersCount,
 		LogsCount:     logsCount,
 		CountBirtdays: birthdaysListLen,
 		CountLogs:     todayLogsNumber,
 		SendEmail:     SendEmailResult,
+		SendAutoAt:    sendAutoAt,
 	}
 
 	itemCountJson, err := json.Marshal(response)
@@ -51,14 +65,17 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	return
 }
 
-func Dashboard() (int64, int64, int, int) {
+func Dashboard() (int64, int64, int, int, int) {
+	settings := GetSettings()
 	usersCount := CountDocuments("users")
 	logsCount := CountDocuments("logs")
 
 	birthdays_list := CreateBirthdaysSlice()
-	todayLogsNumber := getLogs()
+	// currentDate := today
+	today := time.Now().UTC().Truncate(24 * time.Hour)
+	todayLogsNumber := getLogs(today)
 	// GetTemplate("test1")
-	return usersCount, logsCount, len(birthdays_list), todayLogsNumber
+	return usersCount, logsCount, len(birthdays_list), todayLogsNumber, settings.SendAutoAt
 }
 
 // func CheckSettingsAndEmail() string{
@@ -201,10 +218,10 @@ func SendEmail(user Users, settings SettingsUpload, html string) string {
 	return "ok"
 }
 
-func getLogs() int {
-	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
+func getLogs(date time.Time) int {
+	
 	filter := bson.M{
-		"dateCreate": currentDate,
+		"dateCreate": date,
 	}
 	cursor := Find(filter, "logs")
 	var logs []Logs
@@ -271,6 +288,13 @@ func uploadUsers(w http.ResponseWriter, r *http.Request) {
 		documentsModified += InsertIfNotExists(document, filter, update, "users").ModifiedCount
 	}
 
+	if documentsInserted != 0 {
+		result := getStatusToday()
+		if result.IsSent {
+			checkLogsAndSendEmail()
+		}
+
+	}
 	response := DashboardPostResponse{
 		Err:               "Ok",
 		DocumentsInserted: documentsInserted,

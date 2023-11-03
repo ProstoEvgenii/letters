@@ -14,6 +14,8 @@ func main() {
 		log.Fatal()
 	}
 	Connect()
+	autoSend()
+	// getStatusToday()
 	Start()
 
 }

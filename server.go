@@ -15,6 +15,8 @@ func Start() {
 var router = map[string]func(http.ResponseWriter, *http.Request){
 	"Dashboard": DashboardHandler,
 	"Settings":  SettingsHandler,
+	"Database":  DatabaseHandler,
+	"History":   HistoryHandler,
 }
 
 func HandleRequest(rw http.ResponseWriter, request *http.Request) {
