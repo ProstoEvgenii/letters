@@ -1,10 +1,11 @@
-package main
+package pages
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"letters/db"
 	"log"
 	"net/http"
 	"strconv"
@@ -13,9 +14,15 @@ import (
 
 	"github.com/gorilla/schema"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"gopkg.in/gomail.v2"
 )
+
+// var Ico = Router_struct{
+// 	Name:     "Ico",
+// 	CollName: Ico_CollName,
+// 	Event:    Ico_Event,
+// 	Action:   Ico_Action,
+// }
 
 func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	if request.Method == "POST" {
@@ -30,30 +37,17 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	if params.SendTo != "" {
 		var userTest Users
 		userTest.FirstName, userTest.LastName, userTest.Email = "Иван", "Иванов", params.SendTo
+		log.Println("=52316b=", userTest)
 		SendEmailResult = SendTest(userTest)
 	}
-	if params.SendAutoAt != 0 {
-		var settingsData SettingsUpload
-		objectId, _ := primitive.ObjectIDFromHex("6540ff760fc1b4b7a36a287b")
-		filter := bson.M{
-			"_id": objectId,
-		}
-		update := bson.M{"$set": bson.M{
-			"sendAutoAt": params.SendAutoAt,
-		}}
 
-		InsertIfNotExists(settingsData, filter, update, "settings")
-
-	}
-
-	usersCount, logsCount, birthdaysListLen, todayLogsNumber, sendAutoAt := Dashboard()
+	usersCount, logsCount, birthdaysListLen, todayLogsNumber := Dashboard()
 	response := DashboardGetResponse{
 		UsersCount:    usersCount,
 		LogsCount:     logsCount,
 		CountBirtdays: birthdaysListLen,
 		CountLogs:     todayLogsNumber,
 		SendEmail:     SendEmailResult,
-		SendAutoAt:    sendAutoAt,
 	}
 
 	itemCountJson, err := json.Marshal(response)
@@ -65,17 +59,14 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	return
 }
 
-func Dashboard() (int64, int64, int, int, int) {
-	settings := GetSettings()
-	usersCount := CountDocuments("users")
-	logsCount := CountDocuments("logs")
+func Dashboard() (int64, int64, int, int) {
+	usersCount := db.CountDocuments("users")
+	logsCount := db.CountDocuments("logs")
 
 	birthdays_list := CreateBirthdaysSlice()
-	// currentDate := today
-	today := time.Now().UTC().Truncate(24 * time.Hour)
-	todayLogsNumber := getLogs(today)
+	todayLogsNumber := getLogs()
 	// GetTemplate("test1")
-	return usersCount, logsCount, len(birthdays_list), todayLogsNumber, settings.SendAutoAt
+	return usersCount, logsCount, len(birthdays_list), todayLogsNumber
 }
 
 // func CheckSettingsAndEmail() string{
@@ -148,6 +139,7 @@ func SendTest(user Users) string {
 
 	return fmt.Sprintf("Пользователь %s поздравлен", user.Email)
 }
+
 func checkLogsAndSendEmail() string {
 	birthdays_list := CreateBirthdaysSlice()
 	if len(birthdays_list) == 0 {
@@ -218,10 +210,10 @@ func SendEmail(user Users, settings SettingsUpload, html string) string {
 	return "ok"
 }
 
-func getLogs(date time.Time) int {
-	
+func getLogs() int {
+	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
 	filter := bson.M{
-		"dateCreate": date,
+		"dateCreate": currentDate,
 	}
 	cursor := Find(filter, "logs")
 	var logs []Logs
@@ -288,13 +280,6 @@ func uploadUsers(w http.ResponseWriter, r *http.Request) {
 		documentsModified += InsertIfNotExists(document, filter, update, "users").ModifiedCount
 	}
 
-	if documentsInserted != 0 {
-		result := getStatusToday()
-		if result.IsSent {
-			checkLogsAndSendEmail()
-		}
-
-	}
 	response := DashboardPostResponse{
 		Err:               "Ok",
 		DocumentsInserted: documentsInserted,

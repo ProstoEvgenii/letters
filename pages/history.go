@@ -1,9 +1,10 @@
-package main
+package pages
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"letters/db"
 	"log"
 	"net/http"
 	"time"
@@ -19,14 +20,12 @@ func HistoryHandler(rw http.ResponseWriter, request *http.Request) {
 	}
 
 	if request.Method == "GET" {
-		logsCount := CountDocuments("logs")
+		logsCount := db.CountDocuments("logs")
 		today := time.Now().UTC().Truncate(24 * time.Hour)
 		yesterday := time.Now().UTC().AddDate(0, 0, -1).Truncate(24 * time.Hour)
 		// tomorrow := time.Now().UTC().AddDate(0, 0, 1).Truncate(24 * time.Hour)
 		todayLogsNumber := getLogs(today)
 		yesterdayLogsNumber := getLogs(yesterday)
-
-
 
 		cursor := Find(bson.M{}, "logs")
 		var logsSlice []Logs
@@ -41,9 +40,9 @@ func HistoryHandler(rw http.ResponseWriter, request *http.Request) {
 		}
 
 		response := GetHistoryResponse{
-			Records:            logsSlice,
-			LogsCount:          logsCount,
-			TodayLogsCount:     todayLogsNumber,
+			Records:        logsSlice,
+			LogsCount:      logsCount,
+			TodayLogsCount: todayLogsNumber,
 			// TommorowLogsCount:  tomorrowLogsNumber,
 			YesterdayLogsCount: yesterdayLogsNumber,
 		}

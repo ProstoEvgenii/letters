@@ -1,8 +1,7 @@
-package main
+package db
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
@@ -12,10 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var collectionUsers *mongo.Collection
-var collectionLogs *mongo.Collection
-var collectionTemplates *mongo.Collection
-var collectionSettings *mongo.Collection
 var dataBase *mongo.Database
 
 func Connect() {
@@ -33,10 +28,6 @@ func Connect() {
 	log.Println("База данных подключена упешно!")
 
 	dataBase = client.Database(os.Getenv("BASE"))
-	collectionUsers = client.Database(os.Getenv("BASE")).Collection("users")
-	collectionLogs = client.Database(os.Getenv("BASE")).Collection("logs")
-	collectionTemplates = client.Database(os.Getenv("BASE")).Collection("templates")
-	collectionSettings = client.Database(os.Getenv("BASE")).Collection("settings")
 
 	return
 }
@@ -60,31 +51,11 @@ func InsertIfNotExists(document interface{}, filter, update primitive.M, collNam
 
 func CountDocuments(collName string) int64 {
 	ctx := context.TODO()
-	switch collName {
-	case "users":
-		itemCount, err := collectionUsers.CountDocuments(ctx, bson.M{})
-		if err != nil {
-			log.Println("=2671f1=", err)
-		}
-		return itemCount
-
-	case "logs":
-		itemCount, err := collectionLogs.CountDocuments(ctx, bson.M{})
-		if err != nil {
-			log.Println("=2671f1=", err)
-		}
-		return itemCount
-	case "settings":
-		itemCount, err := collectionUsers.CountDocuments(ctx, bson.M{})
-		if err != nil {
-			log.Println("=2671f1=", err)
-		}
-		return itemCount
-	default:
-		fmt.Println("=CountDocuments=", "Не валидный case")
-
+	itemCount, err := dataBase.Collection(collName).CountDocuments(ctx, bson.M{})
+	if err != nil {
+		log.Println("=2671f1=", err)
 	}
-	return 0
+	return itemCount
 
 }
 

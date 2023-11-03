@@ -1,9 +1,10 @@
-package main
+package pages
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"letters/db"
 	"log"
 	"net/http"
 
@@ -18,8 +19,8 @@ func DatabaseHandler(rw http.ResponseWriter, request *http.Request) {
 	}
 
 	if request.Method == "GET" {
-		usersCount := CountDocuments("users")
-		cursor := Find(bson.M{}, "users")
+		usersCount := db.CountDocuments("users")
+		cursor := db.Find(bson.M{}, "users")
 		var usersSlice []Users
 		if err := cursor.All(context.TODO(), &usersSlice); err != nil {
 			log.Println("Cursor All Error Database", err)
