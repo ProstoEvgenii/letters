@@ -1,9 +1,11 @@
-package main
+package pages
 
 import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"letters/db"
+	"letters/models"
 	"log"
 	"net/http"
 	"strconv"
@@ -29,7 +31,7 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 	}
 	if request.Method == "GET" {
 		settings := GetSettings()
-		response := SettingsUpload{
+		response := models.SettingsUpload{
 			Template:   settings.Template,
 			EmailLogin: settings.EmailLogin,
 			Smtp:       settings.Smtp,
@@ -80,17 +82,17 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 //	}
 //
 // }
-func GetSettings() SettingsUpload {
+func GetSettings() models.SettingsUpload {
 	filter := bson.M{}
 
-	var settings SettingsUpload
+	var settings models.SettingsUpload
 
-	cursor := FindOne(filter, "settings")
+	cursor := db.FindOne(filter, "settings")
 	cursor.Decode(&settings)
 
 	return settings
 }
-func CheckConnectionToEmail(settingsData SettingsUpload) string {
+func CheckConnectionToEmail(settingsData models.SettingsUpload) string {
 	port, err := strconv.Atoi(settingsData.Port)
 	if err != nil {
 		fmt.Println("SendEmail Ошибка форматирования строки в int")
@@ -105,8 +107,8 @@ func CheckConnectionToEmail(settingsData SettingsUpload) string {
 	return "Соединение с почтовым ящиком установлено."
 }
 
-func uploadSettings(rw http.ResponseWriter, request *http.Request) DashboardPostResponse {
-	var response DashboardPostResponse
+func uploadSettings(rw http.ResponseWriter, request *http.Request) models.DashboardPostResponse {
+	var response models.DashboardPostResponse
 
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
@@ -115,7 +117,7 @@ func uploadSettings(rw http.ResponseWriter, request *http.Request) DashboardPost
 		return response
 	}
 
-	var settingsData SettingsUpload
+	var settingsData models.SettingsUpload
 
 	if err := json.Unmarshal(body, &settingsData); err != nil {
 		log.Println("=324528f5=", "Ошибка разбора данных JSON", "uploadSettings")
@@ -143,9 +145,9 @@ func uploadSettings(rw http.ResponseWriter, request *http.Request) DashboardPost
 		"dateCreate": currentDate,
 	}}
 
-	settingInserted := InsertIfNotExists(settingsData, filter, update, "settings")
+	settingInserted := db.InsertIfNotExists(settingsData, filter, update, "settings")
 
-	response = DashboardPostResponse{
+	response = models.DashboardPostResponse{
 		Err:               result,
 		DocumentsInserted: settingInserted.UpsertedCount,
 		DocumentsModified: settingInserted.ModifiedCount,

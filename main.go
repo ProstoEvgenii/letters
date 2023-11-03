@@ -1,6 +1,8 @@
 package main
 
 import (
+	"letters/db"
+	"letters/functions"
 	"log"
 	"time"
 
@@ -13,8 +15,8 @@ func main() {
 		time.Sleep(10 * time.Second)
 		log.Fatal()
 	}
-	Connect()
-	autoSend()
+	db.Connect()
+	functions.AutoSend()
 	// getStatusToday()
 	Start()
 

@@ -1,4 +1,4 @@
-package main
+package models
 
 import "time"
 
@@ -32,7 +32,7 @@ type DashboardGetResponse struct {
 	UsersCount    int64  `json:"usersCount"`
 	LogsCount     int64  `json:"logsCount"`
 	CountBirtdays int    `json:"countBirtdays"`
-	CountLogs     int    `json:"todaySent"`
+	CountLogs     int64  `json:"todaySent"`
 	SendEmail     string `json:"sendEmailresult"`
 	SendAutoAt    int    `json:"sendAutoAt"`
 }
@@ -78,10 +78,10 @@ type GetDataBaseResponse struct {
 
 type GetHistoryResponse struct {
 	Records            []Logs `json:"records"`
-	LogsCount          int64   `json:"logsCount"`
-	TodayLogsCount     int     `json:"todayLgsCount"`
-	TommorowLogsCount  int     `json:"tommorowLogsCount"`
-	YesterdayLogsCount int     `json:"yesterdayLogsCount"`
+	LogsCount          int64  `json:"logsCount"`
+	TodayLogsCount     int    `json:"todayLgsCount"`
+	TommorowLogsCount  int    `json:"tommorowLogsCount"`
+	YesterdayLogsCount int    `json:"yesterdayLogsCount"`
 }
 
 // type GetDataBaseResponse struct {

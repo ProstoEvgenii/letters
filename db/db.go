@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -49,9 +48,9 @@ func InsertIfNotExists(document interface{}, filter, update primitive.M, collNam
 
 }
 
-func CountDocuments(collName string) int64 {
+func CountDocuments(filter primitive.M, collName string) int64 {
 	ctx := context.TODO()
-	itemCount, err := dataBase.Collection(collName).CountDocuments(ctx, bson.M{})
+	itemCount, err := dataBase.Collection(collName).CountDocuments(ctx, filter)
 	if err != nil {
 		log.Println("=2671f1=", err)
 	}

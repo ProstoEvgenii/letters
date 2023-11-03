@@ -1,36 +1,39 @@
-package main
+package functions
 
 import (
+	"letters/db"
+	"letters/models"
+	"letters/pages"
 	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func autoSend() {
-	settings := GetSettings()
+func AutoSend() {
+	settings := pages.GetSettings()
 
 	now := time.Now()
 	log.Println("=Вызвалась=", settings.SendAutoAt)
 	if now.Hour() == settings.SendAutoAt && now.Minute() == 20 {
-		result := getStatusToday()
+		result := GetStatusToday()
 		log.Println("=f84318=", result)
 		if !result.IsSent {
-			var info IsSent
+			var info models.IsSent
 			//Отправляю письмо и CreateStatusToday() = true
-			checkLogsAndSendEmail()
+			CheckLogsAndSendEmail()
 			CreateStatusToday(info, true)
 		}
 
 	}
 
 	time.AfterFunc(time.Duration(3)*time.Second, func() {
-		autoSend()
+		AutoSend()
 	})
 
 }
 
-func CreateStatusToday(info IsSent, isSent bool) {
+func CreateStatusToday(info models.IsSent, isSent bool) {
 	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
 	filter := bson.M{
 		"date": currentDate,
@@ -40,21 +43,21 @@ func CreateStatusToday(info IsSent, isSent bool) {
 		"date":   currentDate,
 		"isSent": isSent,
 	}}
-	InsertIfNotExists(info, filter, update, "isSentToday")
+	db.InsertIfNotExists(info, filter, update, "isSentToday")
 
 }
 
-func getStatusToday() IsSent {
+func GetStatusToday() models.IsSent {
 	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
 	filter := bson.M{
 		"date": currentDate,
 	}
-	cursor := FindOne(filter, "isSentToday")
-	var info IsSent
+	cursor := db.FindOne(filter, "isSentToday")
+	var info models.IsSent
 	err := cursor.Decode(&info)
 	if err != nil {
 		log.Println("=5dd75c=", err)
-		return IsSent{}
+		return models.IsSent{}
 	}
 	// if cursor.Err().Error() == "no documents in result"
 	// log.Println("=2bf842=", cursor.Err().Error())

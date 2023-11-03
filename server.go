@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"letters/pages"
 	"log"
 	"net/http"
 	"strings"
@@ -13,10 +14,10 @@ func Start() {
 }
 
 var router = map[string]func(http.ResponseWriter, *http.Request){
-	"Dashboard": DashboardHandler,
-	"Settings":  SettingsHandler,
-	"Database":  DatabaseHandler,
-	"History":   HistoryHandler,
+	"Dashboard": pages.DashboardHandler,
+	"Settings":  pages.SettingsHandler,
+	"Database":  pages.DatabaseHandler,
+	"History":   pages.HistoryHandler,
 }
 
 func HandleRequest(rw http.ResponseWriter, request *http.Request) {

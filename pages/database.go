@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"letters/db"
+	"letters/models"
 	"log"
 	"net/http"
 
@@ -19,9 +20,9 @@ func DatabaseHandler(rw http.ResponseWriter, request *http.Request) {
 	}
 
 	if request.Method == "GET" {
-		usersCount := db.CountDocuments("users")
+		usersCount := db.CountDocuments(bson.M{}, "users")
 		cursor := db.Find(bson.M{}, "users")
-		var usersSlice []Users
+		var usersSlice []models.Users
 		if err := cursor.All(context.TODO(), &usersSlice); err != nil {
 			log.Println("Cursor All Error Database", err)
 			rw.Write([]byte("{}"))
@@ -32,7 +33,7 @@ func DatabaseHandler(rw http.ResponseWriter, request *http.Request) {
 			return
 		}
 
-		response := GetDataBaseResponse{
+		response := models.GetDataBaseResponse{
 			Records:    usersSlice,
 			UsersCount: usersCount,
 		}

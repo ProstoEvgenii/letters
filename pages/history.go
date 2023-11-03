@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"letters/db"
+	"letters/models"
 	"log"
 	"net/http"
 	"time"
@@ -20,15 +21,15 @@ func HistoryHandler(rw http.ResponseWriter, request *http.Request) {
 	}
 
 	if request.Method == "GET" {
-		logsCount := db.CountDocuments("logs")
+		logsCount := db.CountDocuments(bson.M{}, "logs")
 		today := time.Now().UTC().Truncate(24 * time.Hour)
 		yesterday := time.Now().UTC().AddDate(0, 0, -1).Truncate(24 * time.Hour)
 		// tomorrow := time.Now().UTC().AddDate(0, 0, 1).Truncate(24 * time.Hour)
 		todayLogsNumber := getLogs(today)
 		yesterdayLogsNumber := getLogs(yesterday)
 
-		cursor := Find(bson.M{}, "logs")
-		var logsSlice []Logs
+		cursor := db.Find(bson.M{}, "logs")
+		var logsSlice []models.Logs
 		if err := cursor.All(context.TODO(), &logsSlice); err != nil {
 			log.Println("Cursor All Error Database", err)
 			rw.Write([]byte("{}"))
@@ -39,7 +40,7 @@ func HistoryHandler(rw http.ResponseWriter, request *http.Request) {
 			return
 		}
 
-		response := GetHistoryResponse{
+		response := models.GetHistoryResponse{
 			Records:        logsSlice,
 			LogsCount:      logsCount,
 			TodayLogsCount: todayLogsNumber,
@@ -55,4 +56,35 @@ func HistoryHandler(rw http.ResponseWriter, request *http.Request) {
 		rw.Write(dataBaseJson)
 		return
 	}
+}
+
+func getLogs(date time.Time) int {
+	// currentDate := time.Now().UTC().Truncate(24 * time.Hour)
+	filter := bson.M{
+		"dateCreate": date,
+	}
+	cursor := db.Find(filter, "logs")
+	var logs []models.Logs
+	if err := cursor.All(context.TODO(), &logs); err != nil {
+		log.Println("=8922b7=", err)
+	}
+	return len(logs)
+
+}
+func CreateLog(user models.Users) int64 {
+	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
+	filter := bson.M{
+		"E-mail":     user.Email,
+		"dateCreate": currentDate,
+	}
+	update := bson.M{"$setOnInsert": bson.M{
+		"Имя":           user.FirstName,
+		"Фамилия":       user.LastName,
+		"Отчество":      user.MiddleName,
+		"Дата рождения": user.DateOfBirth,
+		"E-mail":        user.Email,
+		"dateCreate":    currentDate,
+	}}
+	result := db.InsertIfNotExists(user, filter, update, "logs").UpsertedCount
+	return result
 }
