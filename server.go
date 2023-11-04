@@ -28,6 +28,8 @@ func HandleRequest(rw http.ResponseWriter, request *http.Request) {
 	// Ищем обработчик в карте по URL-пути
 	handler, exists := router[path[1]]
 	if exists {
+
+		fmt.Println("=172cce=", handler)
 		// Вызываем соответствующую фнкцию из роутера
 		handler(rw, request)
 	} else {
