@@ -71,20 +71,4 @@ func getLogs(date time.Time) int {
 	return len(logs)
 
 }
-func CreateLog(user models.Users) int64 {
-	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
-	filter := bson.M{
-		"E-mail":     user.Email,
-		"dateCreate": currentDate,
-	}
-	update := bson.M{"$setOnInsert": bson.M{
-		"Имя":           user.FirstName,
-		"Фамилия":       user.LastName,
-		"Отчество":      user.MiddleName,
-		"Дата рождения": user.DateOfBirth,
-		"E-mail":        user.Email,
-		"dateCreate":    currentDate,
-	}}
-	result := db.InsertIfNotExists(user, filter, update, "logs").UpsertedCount
-	return result
-}
+

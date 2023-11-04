@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"letters/db"
 	"letters/models"
-	"letters/pages"
 	"log"
 	"strconv"
 	"strings"
@@ -15,6 +14,16 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
+func GetSettings() models.SettingsUpload {
+	filter := bson.M{}
+
+	var settings models.SettingsUpload
+
+	cursor := db.FindOne(filter, "settings")
+	cursor.Decode(&settings)
+
+	return settings
+}
 func CreateBirthdaysSlice() []models.Users {
 	today := time.Now()
 	filter := bson.M{}
@@ -53,7 +62,7 @@ func GetTemplate(templateName string) string {
 }
 
 func SendTest(user models.Users) string {
-	settings := pages.GetSettings()
+	settings := GetSettings()
 	if settings.EmailLogin == "" || settings.EmailPass == "" || settings.Smtp == "" || settings.Port == "" || settings.Template == "" {
 		log.Println("=82842e=", "Настройки не верны либо отсутствуют.")
 		return "Настройки не верны либо отсутствуют."
@@ -80,7 +89,7 @@ func CheckLogsAndSendEmail() string {
 
 	emailSent := 0
 
-	settings := pages.GetSettings()
+	settings := GetSettings()
 	if settings.EmailLogin == "" || settings.EmailPass == "" || settings.Smtp == "" || settings.Port == "" || settings.Template == "" {
 		log.Println("=82842e=", "Настройки не верны либо отсутствуют.")
 		return "Настройки не верны либо отсутствуют."
@@ -92,7 +101,7 @@ func CheckLogsAndSendEmail() string {
 	}
 
 	for _, user := range birthdays_list {
-		result := pages.CreateLog(user)
+		result := CreateLog(user)
 		if result != 0 {
 			//Если результат создания лога == 0 ,значит лог с таким email существует и поздравлять его не нужно
 			err := SendEmail(user, settings, html)
@@ -140,4 +149,21 @@ func SendEmail(user models.Users, settings models.SettingsUpload, html string) s
 	}
 	fmt.Printf("Поздравление отправлено:%s", user.Email)
 	return "ok"
+}
+func CreateLog(user models.Users) int64 {
+	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
+	filter := bson.M{
+		"E-mail":     user.Email,
+		"dateCreate": currentDate,
+	}
+	update := bson.M{"$setOnInsert": bson.M{
+		"Имя":           user.FirstName,
+		"Фамилия":       user.LastName,
+		"Отчество":      user.MiddleName,
+		"Дата рождения": user.DateOfBirth,
+		"E-mail":        user.Email,
+		"dateCreate":    currentDate,
+	}}
+	result := db.InsertIfNotExists(user, filter, update, "logs").UpsertedCount
+	return result
 }

@@ -3,7 +3,6 @@ package functions
 import (
 	"letters/db"
 	"letters/models"
-	"letters/pages"
 	"log"
 	"time"
 
@@ -11,7 +10,9 @@ import (
 )
 
 func AutoSend() {
-	settings := pages.GetSettings()
+	var settings models.SettingsUpload
+	cursor := db.FindOne(bson.M{}, "settings")
+	cursor.Decode(&settings)
 
 	now := time.Now()
 	log.Println("=Вызвалась=", settings.SendAutoAt)

@@ -46,42 +46,7 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 	}
 }
 
-//	func CheckAll(rw http.ResponseWriter, request *http.Request) DashboardPostResponse {
-//		var response DashboardPostResponse
-//		body, err := io.ReadAll(request.Body)
-//		if err != nil {
-//			log.Println("=fa78f5=", "Ошибка чтения данных из запроса", "uploadSettings")
-//			response.Err = "Ошибка"
-//			return response
-//		}
-//		var settingsData SettingsUpload
-//		if err := json.Unmarshal(body, &settingsData); err != nil {
-//			log.Println("=324528f5=", "Ошибка разбора данных JSON", "uploadSettings")
-//			response.Err = "Ошибка"
-//			return response
-//		}
-//		result := CheckConnectionToEmail(settingsData)
-//		if result != "Соединение с почтовым ящиком установлено." {
-//			response.Err = "Ошибка"
-//			return response
-//		}
-//		response = uploadSettings(settingsData, rw)
-//		return response
-//
-//	if result != "ok" {
-//		response := DashboardPostResponse{
-//			Err: result,
-//		}
-//		errBody, err := json.Marshal(response)
-//		if err != nil {
-//			fmt.Println("error:", err)
-//		}
-//		// rw.WriteHeader(http.StatusOK)
-//		rw.Write(errBody)
-//		return
-//	}
-//
-// }
+
 func GetSettings() models.SettingsUpload {
 	filter := bson.M{}
 
@@ -155,3 +120,53 @@ func uploadSettings(rw http.ResponseWriter, request *http.Request) models.Dashbo
 	return response
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//	func CheckAll(rw http.ResponseWriter, request *http.Request) DashboardPostResponse {
+//		var response DashboardPostResponse
+//		body, err := io.ReadAll(request.Body)
+//		if err != nil {
+//			log.Println("=fa78f5=", "Ошибка чтения данных из запроса", "uploadSettings")
+//			response.Err = "Ошибка"
+//			return response
+//		}
+//		var settingsData SettingsUpload
+//		if err := json.Unmarshal(body, &settingsData); err != nil {
+//			log.Println("=324528f5=", "Ошибка разбора данных JSON", "uploadSettings")
+//			response.Err = "Ошибка"
+//			return response
+//		}
+//		result := CheckConnectionToEmail(settingsData)
+//		if result != "Соединение с почтовым ящиком установлено." {
+//			response.Err = "Ошибка"
+//			return response
+//		}
+//		response = uploadSettings(settingsData, rw)
+//		return response
+//
+//	if result != "ok" {
+//		response := DashboardPostResponse{
+//			Err: result,
+//		}
+//		errBody, err := json.Marshal(response)
+//		if err != nil {
+//			fmt.Println("error:", err)
+//		}
+//		// rw.WriteHeader(http.StatusOK)
+//		rw.Write(errBody)
+//		return
+//	}
+//
+// }
