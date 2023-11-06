@@ -15,13 +15,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-// var Ico = Router_struct{
-// 	Name:     "Ico",
-// 	CollName: Ico_CollName,
-// 	Event:    Ico_Event,
-// 	Action:   Ico_Action,
-// }
-
 func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	if request.Method == "POST" {
 		uploadUsers(rw, request)
@@ -66,10 +59,8 @@ func Dashboard() (int64, int64, int, int64) {
 
 	birthdays_list := functions.CreateBirthdaysSlice()
 
-	
 	return usersCount, logsCount, len(birthdays_list), logsLogsToday
 }
-
 
 func uploadUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -124,25 +115,3 @@ func uploadUsers(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(usersAdded)
 }
-
-// func FindLogs() []Users {
-// 	today := time.Now()
-// 	twentyFourHoursAgo := today.Add(-24 * time.Hour)
-// 	// filter := bson.M{}
-// 	filter := bson.M{"Дата рождения": bson.M{"$gte": twentyFourHoursAgo}}
-// 	cursor := Find(filter, "logs")
-// 	var users_logs []Users
-// 	err := cursor.All(context.TODO(), &users_logs)
-// 	if err != nil {
-// 		log.Println("=84ce91=", err)
-// 	}
-
-// 	// var logs_list []Users
-// 	// for _, user := range users_logs {
-// 	// 	if user.DateOfBirth.Day() == today.Day() && user.DateOfBirth.Month() == today.Month() {
-// 	// 		birthdays_list = append(birthdays_list, user)
-// 	// 	}
-// 	// }
-
-// 	return
-// }

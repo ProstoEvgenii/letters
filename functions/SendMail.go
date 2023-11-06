@@ -121,6 +121,45 @@ func CheckLogsAndSendEmail() string {
 
 }
 
+func sendAll(template_name string) string {
+	cursor := db.Find(bson.M{}, "users")
+	var allUsers []models.Users
+	if err := cursor.All(context.TODO(), &allUsers); err != nil {
+		log.Println("Cursor All Error Database", err)
+		return "Ошибка"
+	}
+
+	emailSent := 0
+
+	settings := GetSettings()
+	if settings.EmailLogin == "" || settings.EmailPass == "" || settings.Smtp == "" || settings.Port == "" || settings.Template == "" {
+		log.Println("=82842e=", "Настройки не верны либо отсутствуют.")
+		return "Настройки не верны либо отсутствуют."
+	}
+
+	html := GetTemplate(template_name)
+	if html == "" {
+		return fmt.Sprintf("Шаблона %s не существует", template_name)
+	}
+
+	for _, user := range allUsers {
+		err := SendEmail(user, settings, html)
+		if err != "ok" {
+			return err
+		}
+
+		emailSent += 1
+
+	}
+	if emailSent == 0 {
+		return "Сегодня все поздравлены"
+	} else {
+		log.Printf("Поздравлено %d пользователей", emailSent)
+		return fmt.Sprintf("Поздравлено %d пользователей", emailSent)
+	}
+
+}
+
 func SendEmail(user models.Users, settings models.SettingsUpload, html string) string {
 	first_name := user.FirstName
 	last_name := user.LastName

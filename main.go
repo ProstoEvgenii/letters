@@ -2,6 +2,7 @@ package main
 
 import (
 	"letters/db"
+	"letters/functions"
 	"log"
 	"time"
 
@@ -16,7 +17,7 @@ func main() {
 	}
 	db.Connect()
 	// functions.AutoSend()
-	// getStatusToday()
+	functions.AutoSend()
 	Start()
 
 }

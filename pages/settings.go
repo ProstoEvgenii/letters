@@ -1,6 +1,7 @@
 package pages
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,6 +12,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gorilla/schema"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"gopkg.in/gomail.v2"
@@ -29,13 +31,29 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 		rw.WriteHeader(http.StatusOK)
 		rw.Write(settingsAdded)
 	}
+
 	if request.Method == "GET" {
+		params := new(models.Dashboard_Params)
+		if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
+			log.Println("=Params schema Error News_=", err)
+		}
+		if params.SendTo != "" {
+
+		}
+
 		settings := GetSettings()
-		response := models.SettingsUpload{
+		events := GetEvents()
+
+		settings_response := models.SettingsUpload{
 			Template:   settings.Template,
 			EmailLogin: settings.EmailLogin,
 			Smtp:       settings.Smtp,
 			Port:       settings.Port,
+		}
+
+		response := models.GetSettingsResponse{
+			EventsRecords: events,
+			Settings:      settings_response,
 		}
 		settingsJson, err := json.Marshal(response)
 		if err != nil {
@@ -45,7 +63,6 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 		return
 	}
 }
-
 
 func GetSettings() models.SettingsUpload {
 	filter := bson.M{}
@@ -89,6 +106,7 @@ func uploadSettings(rw http.ResponseWriter, request *http.Request) models.Dashbo
 		response.Err = "Ошибка"
 		return response
 	}
+	// log.Println("=09c43c=", settingsData)
 	result := CheckConnectionToEmail(settingsData)
 
 	if result != "Соединение с почтовым ящиком установлено." {
@@ -121,52 +139,76 @@ func uploadSettings(rw http.ResponseWriter, request *http.Request) models.Dashbo
 
 }
 
+func EventsHandler(rw http.ResponseWriter, request *http.Request) {
+	if request.Method == "POST" {
+		response := uploadEvents(rw, request)
+
+		settingsAdded, err := json.Marshal(response)
+		if err != nil {
+			fmt.Println("error:", err)
+		}
+		rw.WriteHeader(http.StatusOK)
+		rw.Write(settingsAdded)
+	}
+}
+func GetEvents() []models.Events {
+	cursor := db.Find(bson.M{}, "events")
+	var eventsSlice []models.Events
+	if err := cursor.All(context.TODO(), &eventsSlice); err != nil {
+		log.Println("Cursor All Error Events", err)
+	}
+	return eventsSlice
+}
+
+func uploadEvents(rw http.ResponseWriter, request *http.Request) models.DashboardPostResponse {
+	var response models.DashboardPostResponse
+
+	body, err := io.ReadAll(request.Body)
+	if err != nil {
+		log.Println("=fa78f5=", "Ошибка чтения данных из запроса", "uploadEvents", err)
+		response.Err = "Ошибка"
+		return response
+	}
+
+	var eventsData models.EventUpload
+
+	if err := json.Unmarshal(body, &eventsData); err != nil {
+		log.Println("=324528f5=", "Ошибка разбора данных JSON", "uploadEvents", err)
+		response.Err = "Ошибка"
+		return response
+	}
+	date, errDay := strconv.ParseInt(eventsData.Date, 10, 64)
+	month, errMonth := strconv.ParseInt(eventsData.Month, 10, 64)
+	SendAt, errSendAt := strconv.ParseInt(eventsData.SendAt, 10, 64)
+	if errDay != nil || errMonth != nil || errSendAt != nil {
+		log.Println("=0d19ba=", "Ошибка форматирования в int даты и месяца", errDay, errMonth)
+	}
+
+	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
+	filter := bson.M{
+		"name": eventsData.Name,
+	}
+	update := bson.M{"$set": bson.M{
+		"templateName": eventsData.TemplateName,
+		"sendAt":       SendAt,
+		"isDaily":      eventsData.IsDaily,
+		"date":         date,
+		"month":        month,
+		"dateCreate":   currentDate,
+		"isSent":       false,
+	}}
+
+	settingInserted := db.InsertIfNotExists(eventsData, filter, update, "events")
+
+	response = models.DashboardPostResponse{
+		Err:               "ok",
+		DocumentsInserted: settingInserted.UpsertedCount,
+		DocumentsModified: settingInserted.ModifiedCount,
+	}
+	return response
+}
 
 
 
-
-
-
-
-
-
-
-
-
-
-//	func CheckAll(rw http.ResponseWriter, request *http.Request) DashboardPostResponse {
-//		var response DashboardPostResponse
-//		body, err := io.ReadAll(request.Body)
-//		if err != nil {
-//			log.Println("=fa78f5=", "Ошибка чтения данных из запроса", "uploadSettings")
-//			response.Err = "Ошибка"
-//			return response
-//		}
-//		var settingsData SettingsUpload
-//		if err := json.Unmarshal(body, &settingsData); err != nil {
-//			log.Println("=324528f5=", "Ошибка разбора данных JSON", "uploadSettings")
-//			response.Err = "Ошибка"
-//			return response
-//		}
-//		result := CheckConnectionToEmail(settingsData)
-//		if result != "Соединение с почтовым ящиком установлено." {
-//			response.Err = "Ошибка"
-//			return response
-//		}
-//		response = uploadSettings(settingsData, rw)
-//		return response
-//
-//	if result != "ok" {
-//		response := DashboardPostResponse{
-//			Err: result,
-//		}
-//		errBody, err := json.Marshal(response)
-//		if err != nil {
-//			fmt.Println("error:", err)
-//		}
-//		// rw.WriteHeader(http.StatusOK)
-//		rw.Write(errBody)
-//		return
-//	}
-//
-// }
+// response := map[string]string{"message": "Дата получена успешно"}
+//             json.NewEncoder(w).Encode(response)
