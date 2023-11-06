@@ -13,6 +13,7 @@ import (
 
 	"github.com/gorilla/schema"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // var Ico = Router_struct{
@@ -35,17 +36,32 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	if params.SendTo != "" {
 		var userTest models.Users
 		userTest.FirstName, userTest.LastName, userTest.Email = "Иван", "Иванов", params.SendTo
-		log.Println("=52316b=", userTest)
+		// log.Println("=52316b=", userTest)
 		SendEmailResult = functions.SendTest(userTest)
 	}
 
-	usersCount, logsCount, birthdaysListLen, todayLogsNumber := Dashboard()
+	if params.SendAutoAt != 0 {
+		var settingsData models.SettingsUpload
+		objectId, _ := primitive.ObjectIDFromHex("6540ff760fc1b4b7a36a287b")
+		filter := bson.M{
+			"_id": objectId,
+		}
+		update := bson.M{"$set": bson.M{
+			"sendAutoAt": params.SendAutoAt,
+		}}
+
+		db.InsertIfNotExists(settingsData, filter, update, "settings")
+
+	}
+
+	usersCount, logsCount, birthdaysListLen, todayLogsNumber, sendAutoAt := Dashboard()
 	response := models.DashboardGetResponse{
 		UsersCount:    usersCount,
 		LogsCount:     logsCount,
 		CountBirtdays: birthdaysListLen,
 		CountLogs:     todayLogsNumber,
 		SendEmail:     SendEmailResult,
+		SendAutoAt:    sendAutoAt,
 	}
 
 	itemCountJson, err := json.Marshal(response)
@@ -58,18 +74,16 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	return
 }
 
-func Dashboard() (int64, int64, int, int64) {
+func Dashboard() (int64, int64, int, int64, int) {
 	usersCount := db.CountDocuments(bson.M{}, "users")
 	logsCount := db.CountDocuments(bson.M{}, "logs")
 	today := time.Now().UTC().Truncate(24 * time.Hour)
 	logsLogsToday := db.CountDocuments(bson.M{"dateCreate": today}, "logs")
-
+	sendAutoAt := GetSettings().SendAutoAt
 	birthdays_list := functions.CreateBirthdaysSlice()
 
-	
-	return usersCount, logsCount, len(birthdays_list), logsLogsToday
+	return usersCount, logsCount, len(birthdays_list), logsLogsToday, sendAutoAt
 }
-
 
 func uploadUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")

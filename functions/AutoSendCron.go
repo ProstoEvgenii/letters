@@ -15,8 +15,8 @@ func AutoSend() {
 	cursor.Decode(&settings)
 
 	now := time.Now()
-	log.Println("=Вызвалась=", settings.SendAutoAt)
-	if now.Hour() == settings.SendAutoAt && now.Minute() == 20 {
+	// log.Println("=Вызвалась=", settings.SendAutoAt)
+	if now.Hour() == settings.SendAutoAt && now.Minute() == 58 {
 		result := GetStatusToday()
 		log.Println("=f84318=", result)
 		if !result.IsSent {
