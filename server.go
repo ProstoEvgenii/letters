@@ -18,16 +18,23 @@ var router = map[string]func(http.ResponseWriter, *http.Request){
 	"Settings":  pages.SettingsHandler,
 	"Database":  pages.DatabaseHandler,
 	"History":   pages.HistoryHandler,
-	"Events":    pages.EventsHandler,
 }
 
 func HandleRequest(rw http.ResponseWriter, request *http.Request) {
+	//разбиваем полученный запрос на массив строк по разделителю /
 	path := strings.Split(request.URL.Path, "/api/")
+	//берем первую по индексу строку и проверяем существует ли такой маршрут в router
+
+	// Ищем обработчик в карте по URL-пути
 	handler, exists := router[path[1]]
 	if exists {
+
+		fmt.Println("=172cce=", handler)
+		// Вызываем соответствующую фнкцию из роутера
 		handler(rw, request)
 	} else {
 		log.Println("Не найден event => ", path[1])
+		// Обработка случая, когда маршрут не найден
 		http.NotFound(rw, request)
 	}
 }

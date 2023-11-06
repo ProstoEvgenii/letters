@@ -50,20 +50,11 @@ type UsersUpload struct {
 }
 
 type IsSent struct {
-	Name       string    `bson:"name"`
-	dateCreate time.Time `bson:"date"`
-	IsSent     bool      `bson:"isSent"`
+	Date   time.Time `bson:"date"`
+	IsSent bool      `bson:"isSent"`
 }
 
 ////=======Settings
-
-type GetSettingsResponse struct {
-	EventsRecords []Events       `json:"events_records"`
-	Settings      SettingsUpload `json:"settings"`
-}
-
-type SettingsPost struct {
-}
 type SettingsUpload struct {
 	Template   string `json:"template" bson:"template"`
 	EmailLogin string `json:"emailLogin" bson:"emailLogin"`
@@ -71,24 +62,6 @@ type SettingsUpload struct {
 	Smtp       string `json:"smtp" bson:"smtp"`
 	Port       string `json:"port" bson:"port"`
 	SendAutoAt int    `bson:"sendAutoAt"`
-}
-type Events struct {
-	Name         string `json:"name" bson:"name"`
-	TemplateName string `json:"template" bson:"templateName"`
-	SendAt       int    `json:"sendAt" bson:"sendAt"`
-	IsDaily      string `json:"isDaily" bson:"isDaily"`
-	Date         int    `json:"date" bson:"date"`
-	Active       bool   `json:"active" bson:"active"`
-}
-
-type EventUpload struct {
-	Name         string `json:"name" bson:"name"`
-	TemplateName string `json:"template" bson:"templateName"`
-	SendAt       string `json:"sendAt" bson:"sendAt"`
-	IsDaily      string `json:"isDaily" bson:"isDaily"`
-	Date         string `json:"date"`
-	Month        string `json:"month"`
-	// Active       string `json:"active" bson:"active"`
 }
 
 ///========DataBase
