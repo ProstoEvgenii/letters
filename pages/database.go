@@ -32,7 +32,7 @@ func DatabaseHandler(rw http.ResponseWriter, request *http.Request) {
 		if params.Page != 0 {
 			page = params.Page
 		}
-		limit := 2
+		limit := 15
 		skip := limit * (page - 1)
 
 		cursor := db.FindSkip(bson.M{}, "users", skip, limit)
