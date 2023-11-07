@@ -4,7 +4,6 @@ import (
 	"letters/db"
 	"letters/functions"
 	"log"
-	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -12,8 +11,8 @@ import (
 func main() {
 	if err := godotenv.Load(".env"); err != nil {
 		log.Println("Файл .env не найден")
-		time.Sleep(10 * time.Second)
-		log.Fatal()
+		// time.Sleep(10 * time.Second)
+		// log.Fatal()
 	}
 	db.Connect()
 	functions.AutoSend()
