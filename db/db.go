@@ -59,8 +59,18 @@ func CountDocuments(filter primitive.M, collName string) int64 {
 }
 
 func Find(filter primitive.M, collName string) *mongo.Cursor {
-	ctx := context.TODO()
-	cursor, err := dataBase.Collection(collName).Find(ctx, filter)
+	cursor, err := dataBase.Collection(collName).Find(context.TODO(), filter)
+	if err != nil {
+		log.Println("=Find=", err)
+	}
+	return cursor
+}
+
+func FindSkip(filter primitive.M, collName string, skip, limit int) *mongo.Cursor {
+	findOptions := options.Find()
+	findOptions.SetLimit(int64(limit))
+	findOptions.SetSkip(int64(skip))
+	cursor, err := dataBase.Collection(collName).Find(context.TODO(), filter, findOptions)
 	if err != nil {
 		log.Println("=Find=", err)
 	}

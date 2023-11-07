@@ -20,7 +20,7 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 
 	if request.Method == "POST" {
 		response := uploadSettings(rw, request)
-		log.Println("=ad4c75=", response)
+		// log.Println("=ad4c75=", response)
 
 		settingsAdded, err := json.Marshal(response)
 		if err != nil {

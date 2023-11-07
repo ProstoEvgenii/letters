@@ -3,14 +3,16 @@ package main
 import (
 	"letters/db"
 	"letters/functions"
+	"log"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	// if err := godotenv.Load(".env"); err != nil {
-	// 	log.Println("Файл .env не найден")
-	// time.Sleep(10 * time.Second)
-	// log.Fatal()
-	// }
+	if err := godotenv.Load(".env"); err != nil {
+		log.Println("Файл .env не найден")
+
+	}
 	db.Connect()
 	functions.AutoSend()
 	// getStatusToday()

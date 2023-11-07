@@ -26,6 +26,7 @@ type Logs struct {
 type Dashboard_Params struct {
 	SendTo     string `json:"sendTo"`
 	SendAutoAt int    `json:"sendAutoAt"`
+	Page       int    `json:"page"`
 }
 
 type DashboardGetResponse struct {
@@ -72,6 +73,7 @@ type UserRecord struct {
 type GetDataBaseResponse struct {
 	Records    []Users `json:"records"`
 	UsersCount int64   `json:"usersCount"`
+	PageNumber int   `json:"pageNumber"`
 }
 
 //======History
