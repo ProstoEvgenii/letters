@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"fmt"
@@ -8,9 +8,9 @@ import (
 	"strings"
 )
 
-func Start() {
+func Start(host string) {
 	http.HandleFunc("/", HandleRequest)
-	http.ListenAndServe(":80", nil)
+	http.ListenAndServe(host, nil)
 }
 
 var router = map[string]func(http.ResponseWriter, *http.Request){
@@ -18,6 +18,7 @@ var router = map[string]func(http.ResponseWriter, *http.Request){
 	"Settings":  pages.SettingsHandler,
 	"Database":  pages.DatabaseHandler,
 	"History":   pages.HistoryHandler,
+	"UserAuth":  pages.AuthHandler,
 }
 
 func HandleRequest(rw http.ResponseWriter, request *http.Request) {

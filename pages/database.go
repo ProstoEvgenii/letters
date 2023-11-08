@@ -42,10 +42,10 @@ func DatabaseHandler(rw http.ResponseWriter, request *http.Request) {
 			rw.Write([]byte("{}"))
 			return
 		}
-		if len(usersSlice) == 0 {
-			rw.Write([]byte("{}"))
-			return
-		}
+		// if len(usersSlice) == 0 {
+		// 	// rw.Write([]byte("{}"))
+		// 	return
+		// }
 
 		response := models.GetDataBaseResponse{
 			Records:    usersSlice,

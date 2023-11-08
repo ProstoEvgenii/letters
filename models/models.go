@@ -73,7 +73,7 @@ type UserRecord struct {
 type GetDataBaseResponse struct {
 	Records    []Users `json:"records"`
 	UsersCount int64   `json:"usersCount"`
-	PageNumber int   `json:"pageNumber"`
+	PageNumber int     `json:"pageNumber"`
 }
 
 //======History
@@ -84,6 +84,13 @@ type GetHistoryResponse struct {
 	TodayLogsCount     int    `json:"todayLgsCount"`
 	TommorowLogsCount  int    `json:"tommorowLogsCount"`
 	YesterdayLogsCount int    `json:"yesterdayLogsCount"`
+}
+
+//Auth
+type Auth struct {
+	Login    string `json:"login" bson:"login"`
+	Password string `json:"password" bson:"password"`
+	UUID     string `json:"uuid" `
 }
 
 // type GetDataBaseResponse struct {
