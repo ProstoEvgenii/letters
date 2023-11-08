@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"letters/db"
+	"letters/functions"
 	"letters/models"
 	"log"
 	"net/http"
@@ -28,14 +29,23 @@ func DatabaseHandler(rw http.ResponseWriter, request *http.Request) {
 		if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
 			log.Println("=Params schema Error News_=", err)
 		}
+		if params.UUID != "" {
+			_, exists := functions.AuthUsers[params.UUID]
+			if !exists {
+				log.Println("=0687ad=", exists)
+				log.Println("=855a9b=", "Не авторизован")
+			}
+		}
+
 		page := 1
+
 		if params.Page != 0 {
 			page = params.Page
 		}
-		limit := 15
-		skip := limit * (page - 1)
+		limitPerPage := 15
+		skip := limitPerPage * (page - 1)
 
-		cursor := db.FindSkip(bson.M{}, "users", skip, limit)
+		cursor := db.FindSkip(bson.M{}, "users", skip, limitPerPage)
 		var usersSlice []models.Users
 		if err := cursor.All(context.TODO(), &usersSlice); err != nil {
 			log.Println("Cursor All Error Database", err)

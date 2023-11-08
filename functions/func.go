@@ -9,7 +9,6 @@ import (
 
 var AuthUsers = map[string]int64{}
 
-
 func CheckAuthUsers() {
 	now := time.Now()
 	timestampNow := now.Unix()
@@ -18,7 +17,6 @@ func CheckAuthUsers() {
 			delete(AuthUsers, item)
 		}
 	}
-
 }
 func CheckInDB(tmp interface{}, filter bson.M, collName string) bool {
 	find := db.FindOne(filter, collName)

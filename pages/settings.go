@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"io"
 	"letters/db"
+	"letters/functions"
 	"letters/models"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/gorilla/schema"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"gopkg.in/gomail.v2"
@@ -30,6 +32,17 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 		rw.Write(settingsAdded)
 	}
 	if request.Method == "GET" {
+
+		params := new(models.Dashboard_Params)
+		if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
+			log.Println("=Params schema Error News_=", err)
+		}
+		if params.UUID != "" {
+			_, exists := functions.AuthUsers[params.UUID]
+			if !exists {
+				log.Println("=0687ad=", exists)
+			}
+		}
 		settings := GetSettings()
 		response := models.SettingsUpload{
 			Template:   settings.Template,
@@ -46,7 +59,6 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 	}
 }
 
-
 func GetSettings() models.SettingsUpload {
 	filter := bson.M{}
 
@@ -57,6 +69,7 @@ func GetSettings() models.SettingsUpload {
 
 	return settings
 }
+
 func CheckConnectionToEmail(settingsData models.SettingsUpload) string {
 	port, err := strconv.Atoi(settingsData.Port)
 	if err != nil {
@@ -118,21 +131,7 @@ func uploadSettings(rw http.ResponseWriter, request *http.Request) models.Dashbo
 		DocumentsModified: settingInserted.ModifiedCount,
 	}
 	return response
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //	func CheckAll(rw http.ResponseWriter, request *http.Request) DashboardPostResponse {
 //		var response DashboardPostResponse

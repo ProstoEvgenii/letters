@@ -3,6 +3,7 @@ package main
 import (
 	"letters/db"
 	"letters/functions"
+
 	"letters/server"
 	"log"
 
@@ -17,7 +18,10 @@ func main() {
 
 	}
 	db.Connect()
-	functions.AutoSend()
+	slice := functions.CreateBirthdaysSlice()
+	log.Println("=22b5b8=", slice)
+
+	// functions.AutoSend()
 	// getStatusToday()
 	server.Start(host)
 

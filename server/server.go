@@ -2,14 +2,20 @@ package server
 
 import (
 	"fmt"
+	"letters/db"
+	"letters/models"
 	"letters/pages"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/gorilla/schema"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func Start(host string) {
 	http.HandleFunc("/", HandleRequest)
+	http.HandleFunc("/email/unsubcribe", Unsubcribe)
 	http.ListenAndServe(host, nil)
 }
 
@@ -21,6 +27,28 @@ var router = map[string]func(http.ResponseWriter, *http.Request){
 	"UserAuth":  pages.AuthHandler,
 }
 
+func Unsubcribe(rw http.ResponseWriter, request *http.Request) {
+	params := new(models.Unsubscribe)
+	if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
+		log.Println("=Params schema Error News_=", err)
+	}
+
+	if params.Email != "" {
+
+		log.Println("=0b54eb=", params.Email)
+		filter := bson.M{
+			"E-mail": params.Email,
+		}
+		update := bson.M{"$set": bson.M{
+			"unsubscribe": true,
+		}}
+		db.UpdateIfExists(filter, update, "users")
+	}
+
+	http.Redirect(rw, request, "https://xn----dtbsbdgikgdbazpac.xn--p1ai/", http.StatusSeeOther)
+
+}
+
 func HandleRequest(rw http.ResponseWriter, request *http.Request) {
 	//разбиваем полученный запрос на массив строк по разделителю /
 	path := strings.Split(request.URL.Path, "/api/")
@@ -28,6 +56,7 @@ func HandleRequest(rw http.ResponseWriter, request *http.Request) {
 
 	// Ищем обработчик в карте по URL-пути
 	handler, exists := router[path[1]]
+
 	if exists {
 
 		// fmt.Println("=172cce=", handler)

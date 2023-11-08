@@ -17,7 +17,6 @@ import (
 func AuthHandler(rw http.ResponseWriter, request *http.Request) {
 	if request.Method == "POST" {
 		uploadAuth(rw, request)
-		// log.Println("=b129ed=", "Ghdbtn")
 		return
 	}
 
@@ -36,7 +35,6 @@ func uploadAuth(rw http.ResponseWriter, request *http.Request) {
 	data := []byte(params.Password)
 	hash := sha256.Sum256(data)
 	hashString := hex.EncodeToString(hash[:])
-	// log.Println("=cd2c14=", hashString)
 	var tmp interface{}
 	filter := bson.M{
 		"login":    params.Login,
@@ -44,7 +42,6 @@ func uploadAuth(rw http.ResponseWriter, request *http.Request) {
 	}
 
 	check := functions.CheckInDB(tmp, filter, "auth")
-	// log.Println("=9a2574=", check)
 	if !check {
 		fmt.Fprintf(rw, "{\"error\":\" Не верные данные\"}")
 		return

@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"letters/db"
+	"letters/functions"
 	"letters/models"
 	"log"
 	"net/http"
 	"time"
 
+	"github.com/gorilla/schema"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -21,6 +23,19 @@ func HistoryHandler(rw http.ResponseWriter, request *http.Request) {
 	}
 
 	if request.Method == "GET" {
+		params := new(models.Dashboard_Params)
+		if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
+			log.Println("=Params schema Error News_=", err)
+		}
+		if params.UUID != "" {
+			_, exists := functions.AuthUsers[params.UUID]
+			log.Println("=d35bfe=", functions.AuthUsers)
+			if !exists {
+				log.Println("=0687ad=", exists)
+				log.Println("=855a9b=", "Не авторизован")
+			}
+		}
+
 		logsCount := db.CountDocuments(bson.M{}, "logs")
 		today := time.Now().UTC().Truncate(24 * time.Hour)
 		yesterday := time.Now().UTC().AddDate(0, 0, -1).Truncate(24 * time.Hour)
@@ -71,4 +86,3 @@ func getLogs(date time.Time) int {
 	return len(logs)
 
 }
-

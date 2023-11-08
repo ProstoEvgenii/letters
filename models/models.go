@@ -9,6 +9,7 @@ type Users struct {
 	MiddleName  string    `bson:"Отчество"`
 	DateOfBirth time.Time `bson:"Дата рождения"`
 	Email       string    `bson:"E-mail"`
+	Unsubscribe bool      `bson:"unsubscribe"`
 }
 type Templates struct {
 	Name      string `bson:"name"`
@@ -24,6 +25,7 @@ type Logs struct {
 	DateCreate  time.Time `bson:"dateCreate"`
 }
 type Dashboard_Params struct {
+	UUID       string `json:"uuid"`
 	SendTo     string `json:"sendTo"`
 	SendAutoAt int    `json:"sendAutoAt"`
 	Page       int    `json:"page"`
@@ -91,6 +93,11 @@ type Auth struct {
 	Login    string `json:"login" bson:"login"`
 	Password string `json:"password" bson:"password"`
 	UUID     string `json:"uuid" `
+}
+
+//Unsubscribe
+type Unsubscribe struct {
+	Email string `json:"email"`
 }
 
 // type GetDataBaseResponse struct {

@@ -25,7 +25,7 @@ import (
 
 func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	if request.Method == "POST" {
-		
+
 		uploadUsers(rw, request)
 		return
 	}
@@ -34,9 +34,20 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 		log.Println("=Params schema Error News_=", err)
 	}
 	var SendEmailResult string
+
+	if params.UUID != "" {
+		value, exists := functions.AuthUsers[params.UUID]
+		// log.Println("=a91e22=", value)
+		if !exists {
+			log.Println("=0687ad=", exists, value)
+			log.Println("=3e6638=")
+		}
+	}
+
 	if params.SendTo != "" {
 		var userTest models.Users
 		userTest.FirstName, userTest.LastName, userTest.Email = "Иван", "Иванов", params.SendTo
+		log.Println("=bcb70e=", userTest)
 		SendEmailResult = functions.SendTest(userTest)
 	}
 
@@ -138,25 +149,3 @@ func uploadUsers(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(usersAdded)
 }
-
-// func FindLogs() []Users {
-// 	today := time.Now()
-// 	twentyFourHoursAgo := today.Add(-24 * time.Hour)
-// 	// filter := bson.M{}
-// 	filter := bson.M{"Дата рождения": bson.M{"$gte": twentyFourHoursAgo}}
-// 	cursor := Find(filter, "logs")
-// 	var users_logs []Users
-// 	err := cursor.All(context.TODO(), &users_logs)
-// 	if err != nil {
-// 		log.Println("=84ce91=", err)
-// 	}
-
-// 	// var logs_list []Users
-// 	// for _, user := range users_logs {
-// 	// 	if user.DateOfBirth.Day() == today.Day() && user.DateOfBirth.Month() == today.Month() {
-// 	// 		birthdays_list = append(birthdays_list, user)
-// 	// 	}
-// 	// }
-
-// 	return
-// }
