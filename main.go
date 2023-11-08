@@ -21,7 +21,7 @@ func main() {
 	slice := functions.CreateBirthdaysSlice()
 	log.Println("=22b5b8=", slice)
 
-	// functions.AutoSend()
+	functions.AutoSend()
 	// getStatusToday()
 	server.Start(host)
 
