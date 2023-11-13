@@ -16,23 +16,30 @@ func AutoSend() {
 
 	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
 	today := time.Now()
+	currentDay := int64(today.Day())
+	currentMonth := int64(today.Month())
+	currentHour := int64(today.Hour())
+	currentMinute := today.Minute()
 	for _, event := range events {
 		if event.IsDaily {
 			if event.MustSend != currentDate {
 				log.Println("=700beb=", "Обновлено")
 				UpdateEvent(event.Name, false)
-			} else if event.SendAt == int64(today.Hour()) && today.Minute() == 34 && event.IsSent != true {
+			} else if event.SendAt == currentDay && currentMinute == 34 && !event.IsSent {
 				// log.Println("=da64d5=", "Время отправки", event)
 				CheckLogsAndSendEmail(event, settings)
 				UpdateEvent(event.Name, true)
 			}
-		} else {
-			log.Println("=86f765=", event.Day != int64(currentDate.Day()) && event.Month != int64(currentDate.Month()) && event.IsSent == true)
-			if event.Day == int64(currentDate.Day()) && event.Month == int64(currentDate.Month()) && event.IsSent == true {
+		}
 
+		if !event.IsDaily && event.Day == currentDay && event.Month == currentMonth {
+			if event.IsSent && event.SendAt != currentHour {
 				log.Println("=69734c=", event.Name)
 				UpdateEvent(event.Name, false)
 				// log.Println("=1228e4=", "Поздравляю с Днем города")
+			} else if !event.IsSent && event.SendAt == currentHour && currentMinute == 00 {
+				log.Println("=72e334=")
+				UpdateEvent(event.Name, true)
 			}
 		}
 	}

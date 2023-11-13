@@ -35,7 +35,7 @@ func CreateBirthdaysSlice() []models.Users {
 	}
 	var birthdays_list []models.Users
 	for _, user := range users {
-		if user.DateOfBirth.Day() == today.Day() && user.DateOfBirth.Month() == today.Month() && user.Unsubscribe != true {
+		if user.DateOfBirth.Day() == today.Day() && user.DateOfBirth.Month() == today.Month() && !user.Unsubscribe  {
 			birthdays_list = append(birthdays_list, user)
 		}
 	}
