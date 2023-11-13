@@ -16,12 +16,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// var Ico = Router_struct{
-// 	Name:     "Ico",
-// 	CollName: Ico_CollName,
-// 	Event:    Ico_Event,
-// 	Action:   Ico_Action,
-// }
 
 func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	if request.Method == "POST" {
@@ -48,21 +42,10 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 		var userTest models.Users
 		userTest.FirstName, userTest.LastName, userTest.Email = "Иван", "Иванов", params.SendTo
 		log.Println("=bcb70e=", userTest)
-		SendEmailResult = functions.SendTest(userTest)
+		SendEmailResult = functions.SendTest(userTest, "birthday")
 	}
-
-	if params.SendAutoAt != 0 {
-		var settingsData models.SettingsUpload
-		objectId, _ := primitive.ObjectIDFromHex("6540ff760fc1b4b7a36a287b")
-		filter := bson.M{
-			"_id": objectId,
-		}
-		update := bson.M{"$set": bson.M{
-			"sendAutoAt": params.SendAutoAt,
-		}}
-
-		db.InsertIfNotExists(settingsData, filter, update, "settings")
-
+	if params.Test != 0 {
+		log.Println("=4285a3=",)
 	}
 
 	usersCount, logsCount, birthdaysListLen, todayLogsNumber, sendAutoAt := Dashboard()
@@ -88,6 +71,7 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 func Dashboard() (int64, int64, int, int64, int) {
 	usersCount := db.CountDocuments(bson.M{}, "users")
 	logsCount := db.CountDocuments(bson.M{}, "logs")
+
 	today := time.Now().UTC().Truncate(24 * time.Hour)
 	logsLogsToday := db.CountDocuments(bson.M{"dateCreate": today}, "logs")
 	sendAutoAt := GetSettings().SendAutoAt
@@ -132,8 +116,21 @@ func uploadUsers(w http.ResponseWriter, r *http.Request) {
 			"Дата рождения": dateBirth,
 			"E-mail":        document.Email,
 		}}
-		documentsInserted += db.InsertIfNotExists(document, filter, update, "users").UpsertedCount
-		documentsModified += db.InsertIfNotExists(document, filter, update, "users").ModifiedCount
+		documentsInserted += db.InsertIfNotExists(filter, update, "users").UpsertedCount
+		documentsModified += db.InsertIfNotExists(filter, update, "users").ModifiedCount
+	}
+	if documentsInserted != 0 {
+		objectId, _ := primitive.ObjectIDFromHex("6548eb240fc1b4b7a3800f31")
+		filter := bson.M{
+			"_id": objectId,
+		}
+		var event models.Events
+		result := db.FindOne(filter, "events")
+		result.Decode(&event)
+		if event.Name == "День рождения" && event.IsSent == true {
+			settings := GetSettings()
+			functions.CheckLogsAndSendEmail(event, settings)
+		}
 	}
 
 	response := models.DashboardPostResponse{

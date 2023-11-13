@@ -61,19 +61,19 @@ func GetTemplate(templateName string) string {
 
 }
 
-func SendTest(user models.Users) string {
+func SendTest(user models.Users, templateName string) string {
 	settings := GetSettings()
-	if settings.EmailLogin == "" || settings.EmailPass == "" || settings.Smtp == "" || settings.Port == "" || settings.Template == "" {
+	if settings.EmailLogin == "" || settings.EmailPass == "" || settings.Smtp == "" || settings.Port == "" {
 		log.Println("=82842e=", "Настройки не верны либо отсутствуют.")
 		return "Настройки не верны либо отсутствуют."
 	}
 
-	html := GetTemplate(settings.Template)
+	html := GetTemplate(templateName)
 	if html == "" {
-		return fmt.Sprintf("Шаблона %s не существует", settings.Template)
+		return fmt.Sprintf("Шаблона %s не существует", templateName)
 	}
 
-	err := SendEmail(user, settings, html)
+	err := SendEmail(user, settings, templateName, "test")
 	if err != "ok" {
 		return err
 	}
@@ -81,38 +81,26 @@ func SendTest(user models.Users) string {
 	return fmt.Sprintf("Пользователь %s поздравлен", user.Email)
 }
 
-func CheckLogsAndSendEmail() string {
+func CheckLogsAndSendEmail(event models.Events, settings models.SettingsUpload) string {
 	birthdays_list := CreateBirthdaysSlice()
 	if len(birthdays_list) == 0 {
+		log.Println("=91c8c4=", "Нет Дней рождений сегодня")
 		return "Нет Дней рождений сегодня"
 	}
-
 	emailSent := 0
-
-	settings := GetSettings()
-	if settings.EmailLogin == "" || settings.EmailPass == "" || settings.Smtp == "" || settings.Port == "" || settings.Template == "" {
-		log.Println("=82842e=", "Настройки не верны либо отсутствуют.")
-		return "Настройки не верны либо отсутствуют."
-	}
-
-	html := GetTemplate(settings.Template)
-	if html == "" {
-		return fmt.Sprintf("Шаблона %s не существует", settings.Template)
-	}
-
 	for _, user := range birthdays_list {
 		result := CreateLog(user)
 		if result != 0 {
 			//Если результат создания лога == 0 ,значит лог с таким email существует и поздравлять его не нужно
-			err := SendEmail(user, settings, html)
+			err := SendEmail(user, settings, event.TemplateName, event.Subject)
 			if err != "ok" {
 				return err
 			}
-
 			emailSent += 1
 		}
 	}
 	if emailSent == 0 {
+		log.Println("=5c58cc=", "Сегодня все поздравлены")
 		return "Сегодня все поздравлены"
 	} else {
 		log.Printf("Поздравлено %d пользователей", emailSent)
@@ -121,11 +109,11 @@ func CheckLogsAndSendEmail() string {
 
 }
 
-func SendEmail(user models.Users, settings models.SettingsUpload, html string) string {
+func SendEmail(user models.Users, settings models.SettingsUpload, templateName string, subject string) string {
 	first_name := user.FirstName
 	last_name := user.LastName
-
-	subject := "C днем рождения! От главы администрации."
+	html := GetTemplate(templateName)
+	// subject := "C днем рождения!"
 
 	replacer := strings.NewReplacer("${first_name}", first_name, "${last_name}", last_name, "${email}", user.Email)
 
@@ -138,7 +126,8 @@ func SendEmail(user models.Users, settings models.SettingsUpload, html string) s
 	html = replacer.Replace(html)
 
 	m := gomail.NewMessage()
-	m.SetHeader("From", settings.EmailLogin)
+	from := m.FormatAddress(settings.EmailLogin, "Глава администрации")
+	m.SetHeader("From", from)
 	m.SetHeader("To", user.Email)
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/html", html)
@@ -154,10 +143,12 @@ func SendEmail(user models.Users, settings models.SettingsUpload, html string) s
 func CreateLog(user models.Users) int64 {
 	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
 	filter := bson.M{
+		"event":      "День рождения",
 		"E-mail":     user.Email,
 		"dateCreate": currentDate,
 	}
 	update := bson.M{"$setOnInsert": bson.M{
+		"event":         "День рождения",
 		"Имя":           user.FirstName,
 		"Фамилия":       user.LastName,
 		"Отчество":      user.MiddleName,
@@ -165,6 +156,6 @@ func CreateLog(user models.Users) int64 {
 		"E-mail":        user.Email,
 		"dateCreate":    currentDate,
 	}}
-	result := db.InsertIfNotExists(user, filter, update, "logs").UpsertedCount
+	result := db.InsertIfNotExists(filter, update, "logs").UpsertedCount
 	return result
 }

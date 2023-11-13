@@ -12,7 +12,7 @@ var AuthUsers = map[string]int64{}
 func CheckAuthUsers() {
 	now := time.Now()
 	timestampNow := now.Unix()
-	for item, _ := range AuthUsers {
+	for item := range AuthUsers {
 		if timestampNow > AuthUsers[item]+(60*60*24) {
 			delete(AuthUsers, item)
 		}

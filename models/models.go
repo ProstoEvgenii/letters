@@ -29,6 +29,7 @@ type Dashboard_Params struct {
 	SendTo     string `json:"sendTo"`
 	SendAutoAt int    `json:"sendAutoAt"`
 	Page       int    `json:"page"`
+	Test       int    `json:"test"`
 }
 
 type DashboardGetResponse struct {
@@ -52,10 +53,10 @@ type UsersUpload struct {
 	Email       string `json:"E-mail" bson:"E-mail"`
 }
 
-type IsSent struct {
-	Date   time.Time `bson:"date"`
-	IsSent bool      `bson:"isSent"`
-}
+// type IsSent struct {
+// 	Date   time.Time `bson:"date"`
+// 	IsSent bool      `bson:"isSent"`
+// }
 
 ////=======Settings
 type SettingsUpload struct {
@@ -100,16 +101,20 @@ type Unsubscribe struct {
 	Email string `json:"email"`
 }
 
+//Events
+type Events struct {
+	Name         string    `json:"name" bson:"name"`
+	IsDaily      bool      `json:"isDaily" bson:"isDaily"`
+	IsSent       bool      `json:"isSent" bson:"isSent"`
+	Subject      string    `json:"subject" bson:"subject"`
+	Day          int64     `json:"day" bson:"day"`
+	Month        int64     `json:"month" bson:"month"`
+	TemplateName string    `json:"templateName" bson:"templateName"`
+	MustSend     time.Time `json:"mustSend" bson:"mustSend"`
+	SendAt       int64     `json:"sendAt" bson:"sendAt"`
+}
+
 // type GetDataBaseResponse struct {
 // 	Records    []byte
 // 	UsersCount int64
-// }
-
-////===========================
-// type Data struct {
-// 	Last_name   string `json:"Фамилия" bson:"Фамилия"`
-// 	First_name  string `json:"Имя" bson:"Имя"`
-// 	Middle_name string `json:"Отчество" bson:"Отчество"`
-// 	Date_birth  string `json:"Дата рождения" bson:"Дата рождения"`
-// 	Email       string `json:"E-mail" bson:"E-mail"`
 // }

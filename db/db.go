@@ -31,7 +31,7 @@ func Connect() {
 	return
 }
 
-func InsertIfNotExists(document interface{}, filter, update primitive.M, collName string) *mongo.UpdateResult {
+func InsertIfNotExists(filter, update primitive.M, collName string) *mongo.UpdateResult {
 	opts := options.Update().SetUpsert(true)
 	ctx := context.TODO()
 	result, err := dataBase.Collection(collName).UpdateOne(ctx, filter, update, opts)
@@ -45,23 +45,15 @@ func InsertIfNotExists(document interface{}, filter, update primitive.M, collNam
 	// if result.UpsertedCount != 0 {
 	// 	fmt.Printf("inserted a new document with ID %v\n", result.UpsertedID)
 	// }
-
 }
 
 func UpdateIfExists(filter, update primitive.M, collName string) *mongo.UpdateResult {
 	opts := options.Update().SetUpsert(false)
 	result, err := dataBase.Collection(collName).UpdateOne(context.TODO(), filter, update, opts)
 	if err != nil {
-		log.Println("=InsertIfNotExists=", err)
+		log.Println("=UpdateIfExists=", err)
 	}
 	return result
-	// if result.MatchedCount != 0 {
-	// 	fmt.Println("matched and replaced an existing document")
-	// }
-	// if result.UpsertedCount != 0 {
-	// 	fmt.Printf("inserted a new document with ID %v\n", result.UpsertedID)
-	// }
-
 }
 
 func CountDocuments(filter primitive.M, collName string) int64 {
