@@ -93,7 +93,7 @@ type GetHistoryResponse struct {
 type Auth struct {
 	Login    string `json:"login" bson:"login"`
 	Password string `json:"password" bson:"password"`
-	UUID     string `json:"uuid" `
+	UUID     string `json:"uuid"`
 }
 
 //Unsubscribe

@@ -114,7 +114,7 @@ func uploadSettings(rw http.ResponseWriter, request *http.Request) models.Dashbo
 		"_id": objectId,
 	}
 	update := bson.M{"$set": bson.M{
-		"template":   settingsData.Template,
+		// "template":   settingsData.Template,
 		"emailLogin": settingsData.EmailLogin,
 		"emailPass":  settingsData.EmailPass,
 		"smtp":       settingsData.Smtp,

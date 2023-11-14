@@ -35,7 +35,7 @@ func CreateBirthdaysSlice() []models.Users {
 	}
 	var birthdays_list []models.Users
 	for _, user := range users {
-		if user.DateOfBirth.Day() == today.Day() && user.DateOfBirth.Month() == today.Month() && !user.Unsubscribe  {
+		if user.DateOfBirth.Day() == today.Day() && user.DateOfBirth.Month() == today.Month() && !user.Unsubscribe {
 			birthdays_list = append(birthdays_list, user)
 		}
 	}
@@ -108,12 +108,21 @@ func CheckLogsAndSendEmail(event models.Events, settings models.SettingsUpload) 
 	}
 
 }
+func SendToEverybody() {
+	filter := bson.M{}
+	cursor := db.Find(filter, "users")
+	var users []models.Users
+	err := cursor.All(context.TODO(), &users)
+	if err != nil {
+		log.Println("=84ce91=", err)
+	}
+	log.Println("=e846c2=",users)
 
+}
 func SendEmail(user models.Users, settings models.SettingsUpload, templateName string, subject string) string {
 	first_name := user.FirstName
 	last_name := user.LastName
 	html := GetTemplate(templateName)
-	// subject := "C днем рождения!"
 
 	replacer := strings.NewReplacer("${first_name}", first_name, "${last_name}", last_name, "${email}", user.Email)
 

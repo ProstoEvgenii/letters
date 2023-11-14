@@ -13,7 +13,6 @@ import (
 func AutoSend() {
 	events := getEvents()
 	settings := GetSettings()
-
 	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
 	today := time.Now()
 	currentDay := int64(today.Day())
@@ -23,22 +22,21 @@ func AutoSend() {
 	for _, event := range events {
 		if event.IsDaily {
 			if event.MustSend != currentDate {
-				log.Println("=700beb=", "Обновлено")
 				UpdateEvent(event.Name, false)
-			} else if event.SendAt == currentDay && currentMinute == 34 && !event.IsSent {
-				// log.Println("=da64d5=", "Время отправки", event)
+			} else if event.SendAt == currentHour && currentMinute == 23 && !event.IsSent {
+				log.Println("=700beb=", "Daily", event.Name)
 				CheckLogsAndSendEmail(event, settings)
 				UpdateEvent(event.Name, true)
 			}
 		}
 
 		if !event.IsDaily && event.Day == currentDay && event.Month == currentMonth {
-			if event.IsSent && event.SendAt != currentHour {
+			if event.IsSent {
 				log.Println("=69734c=", event.Name)
 				UpdateEvent(event.Name, false)
-				// log.Println("=1228e4=", "Поздравляю с Днем города")
-			} else if !event.IsSent && event.SendAt == currentHour && currentMinute == 00 {
-				log.Println("=72e334=")
+			} else if !event.IsSent && event.SendAt == currentHour && currentMinute == 23 {
+				log.Println("=72e334=", "Отправлено", event.Name)
+				SendToEverybody()
 				UpdateEvent(event.Name, true)
 			}
 		}
@@ -48,6 +46,7 @@ func AutoSend() {
 		AutoSend()
 	})
 }
+
 func getEvents() []models.Events {
 	filter := bson.M{}
 	cursor := db.Find(filter, "events")
