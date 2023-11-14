@@ -117,7 +117,6 @@ func SendToEverybody() {
 		log.Println("=84ce91=", err)
 	}
 	log.Println("=e846c2=",users)
-
 }
 func SendEmail(user models.Users, settings models.SettingsUpload, templateName string, subject string) string {
 	first_name := user.FirstName

@@ -29,10 +29,11 @@ func HistoryHandler(rw http.ResponseWriter, request *http.Request) {
 		}
 		if params.UUID != "" {
 			_, exists := functions.AuthUsers[params.UUID]
-			log.Println("=d35bfe=", functions.AuthUsers)
+			// log.Println("=d35bfe=", functions.AuthUsers)
 			if !exists {
-				log.Println("=0687ad=", exists)
-				log.Println("=855a9b=", "Не авторизован")
+				return
+				// log.Println("=0687ad=", exists)
+				// log.Println("=855a9b=", "Не авторизован")
 			}
 		}
 

@@ -22,9 +22,7 @@ func DatabaseHandler(rw http.ResponseWriter, request *http.Request) {
 	}
 
 	if request.Method == "GET" {
-
 		usersCount := db.CountDocuments(bson.M{}, "users")
-
 		params := new(models.Dashboard_Params)
 		if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
 			log.Println("=Params schema Error News_=", err)
@@ -32,8 +30,7 @@ func DatabaseHandler(rw http.ResponseWriter, request *http.Request) {
 		if params.UUID != "" {
 			_, exists := functions.AuthUsers[params.UUID]
 			if !exists {
-				log.Println("=0687ad=", exists)
-				log.Println("=855a9b=", "Не авторизован")
+				return
 			}
 		}
 

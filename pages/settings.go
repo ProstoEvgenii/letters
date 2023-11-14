@@ -1,6 +1,7 @@
 package pages
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -43,8 +44,10 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 			}
 		}
 		settings := GetSettings()
+		events := GetEvents()
+
 		response := models.SettingsUpload{
-			// Template:   settings.Template,
+			Records:    events,
 			EmailLogin: settings.EmailLogin,
 			Smtp:       settings.Smtp,
 			Port:       settings.Port,
@@ -56,6 +59,16 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 		rw.Write(settingsJson)
 		return
 	}
+}
+
+func GetEvents() []models.Events {
+	filter := bson.M{}
+	cursor := db.Find(filter, "events")
+	var events []models.Events
+	if err := cursor.All(context.TODO(), &events); err != nil {
+		log.Println("=8922b7=", err)
+	}
+	return events
 }
 
 func GetSettings() models.SettingsUpload {
@@ -83,6 +96,9 @@ func CheckConnectionToEmail(settingsData models.SettingsUpload) string {
 	log.Println("Соединение с почтовым ящиком установлено.")
 	return "Соединение с почтовым ящиком установлено."
 }
+
+
+
 
 func uploadSettings(rw http.ResponseWriter, request *http.Request) models.DashboardPostResponse {
 	var response models.DashboardPostResponse

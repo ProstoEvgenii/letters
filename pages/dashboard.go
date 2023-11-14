@@ -16,7 +16,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-
 func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	if request.Method == "POST" {
 
@@ -45,17 +44,17 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 		SendEmailResult = functions.SendTest(userTest, "birthday")
 	}
 	if params.Test != 0 {
-		log.Println("=4285a3=",)
+		log.Println("=4285a3=")
 	}
 
-	usersCount, logsCount, birthdaysListLen, todayLogsNumber, sendAutoAt := Dashboard()
+	usersCount, logsCount, birthdaysListLen, todayLogsNumber := Dashboard()
 	response := models.DashboardGetResponse{
 		UsersCount:    usersCount,
 		LogsCount:     logsCount,
 		CountBirtdays: birthdaysListLen,
 		CountLogs:     todayLogsNumber,
 		SendEmail:     SendEmailResult,
-		SendAutoAt:    sendAutoAt,
+		// SendAutoAt:    sendAutoAt,
 	}
 
 	itemCountJson, err := json.Marshal(response)
@@ -68,16 +67,16 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	return
 }
 
-func Dashboard() (int64, int64, int, int64, int) {
+func Dashboard() (int64, int64, int, int64) {
 	usersCount := db.CountDocuments(bson.M{}, "users")
 	logsCount := db.CountDocuments(bson.M{}, "logs")
 
 	today := time.Now().UTC().Truncate(24 * time.Hour)
 	logsLogsToday := db.CountDocuments(bson.M{"dateCreate": today}, "logs")
-	sendAutoAt := GetSettings().SendAutoAt
+	// sendAutoAt := GetSettings().SendAutoAt
 	birthdays_list := functions.CreateBirthdaysSlice()
 
-	return usersCount, logsCount, len(birthdays_list), logsLogsToday, sendAutoAt
+	return usersCount, logsCount, len(birthdays_list), logsLogsToday
 }
 
 func uploadUsers(w http.ResponseWriter, r *http.Request) {

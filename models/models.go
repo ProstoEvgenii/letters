@@ -53,26 +53,18 @@ type UsersUpload struct {
 	Email       string `json:"E-mail" bson:"E-mail"`
 }
 
-// type IsSent struct {
-// 	Date   time.Time `bson:"date"`
-// 	IsSent bool      `bson:"isSent"`
-// }
-
 ////=======Settings
 type SettingsUpload struct {
-	Template   string `json:"template" bson:"template"`
-	EmailLogin string `json:"emailLogin" bson:"emailLogin"`
-	EmailPass  string `json:"emailPass" bson:"emailPass"`
-	Smtp       string `json:"smtp" bson:"smtp"`
-	Port       string `json:"port" bson:"port"`
-	SendAutoAt int    `bson:"sendAutoAt"`
+	Records    []Events `json:"records"`
+	EmailLogin string   `json:"emailLogin" bson:"emailLogin"`
+	EmailPass  string   `json:"emailPass" bson:"emailPass"`
+	Smtp       string   `json:"smtp" bson:"smtp"`
+	Port       string   `json:"port" bson:"port"`
+	SendAutoAt int      `bson:"sendAutoAt"`
 }
 
 ///========DataBase
 
-type UserRecord struct {
-	User UsersUpload `json:"user"`
-}
 type GetDataBaseResponse struct {
 	Records    []Users `json:"records"`
 	UsersCount int64   `json:"usersCount"`
@@ -112,6 +104,7 @@ type Events struct {
 	TemplateName string    `json:"templateName" bson:"templateName"`
 	MustSend     time.Time `json:"mustSend" bson:"mustSend"`
 	SendAt       int64     `json:"sendAt" bson:"sendAt"`
+	From         string    `json:"from" bson:"from"`
 }
 
 // type GetDataBaseResponse struct {

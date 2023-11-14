@@ -11,7 +11,7 @@ import (
 )
 
 func AutoSend() {
-	events := getEvents()
+	events := GetEvents()
 	settings := GetSettings()
 	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
 	today := time.Now()
@@ -47,7 +47,7 @@ func AutoSend() {
 	})
 }
 
-func getEvents() []models.Events {
+func GetEvents() []models.Events {
 	filter := bson.M{}
 	cursor := db.Find(filter, "events")
 	var events []models.Events

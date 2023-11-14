@@ -25,6 +25,26 @@ var router = map[string]func(http.ResponseWriter, *http.Request){
 	"Database":  pages.DatabaseHandler,
 	"History":   pages.HistoryHandler,
 	"UserAuth":  pages.AuthHandler,
+	"Events":    pages.UploadEventsHandler,
+}
+
+func HandleRequest(rw http.ResponseWriter, request *http.Request) {
+
+	path := strings.Split(request.URL.Path, "/api/")
+
+	handler, exists := router[path[1]]
+
+	if exists {
+		handler(rw, request)
+	} else {
+		log.Println("Не найден handler => ", path[1])
+		// Обработка случая, когда маршрут не найден
+		http.NotFound(rw, request)
+	}
+}
+
+func anyPage(rw http.ResponseWriter, request *http.Request) {
+	fmt.Fprintf(rw, "Hello")
 }
 
 func Unsubcribe(rw http.ResponseWriter, request *http.Request) {
@@ -47,25 +67,4 @@ func Unsubcribe(rw http.ResponseWriter, request *http.Request) {
 
 	http.Redirect(rw, request, "https://xn----dtbsbdgikgdbazpac.xn--p1ai/", http.StatusSeeOther)
 
-}
-
-func HandleRequest(rw http.ResponseWriter, request *http.Request) {
-	//разбиваем полученный запрос на массив строк по разделителю /
-	path := strings.Split(request.URL.Path, "/api/")
-	//берем первую по индексу строку и проверяем существует ли такой маршрут в router
-
-	// Ищем обработчик в карте по URL-пути
-	handler, exists := router[path[1]]
-
-	if exists {
-		handler(rw, request)
-	} else {
-		log.Println("Не найден handler => ", path[1])
-		// Обработка случая, когда маршрут не найден
-		http.NotFound(rw, request)
-	}
-}
-
-func anyPage(rw http.ResponseWriter, request *http.Request) {
-	fmt.Fprintf(rw, "Hello")
 }
