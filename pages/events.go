@@ -2,6 +2,7 @@ package pages
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"letters/db"
 	"letters/models"
@@ -13,7 +14,13 @@ import (
 
 func UploadEventsHandler(rw http.ResponseWriter, request *http.Request) {
 	if request.Method == "POST" {
-		UploadEvents(rw, request)
+		response := UploadEvents(rw, request)
+		eventAdded, err := json.Marshal(response)
+		if err != nil {
+			fmt.Println("error:", err)
+		}
+		rw.WriteHeader(http.StatusOK)
+		rw.Write(eventAdded)
 		return
 	}
 
