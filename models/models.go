@@ -15,6 +15,9 @@ type Templates struct {
 	Name      string `bson:"name"`
 	IndexHTML string `bson:"indexHTML"`
 }
+type TemplatesList struct {
+	Name      string `bson:"name"`
+}
 
 type Logs struct {
 	FirstName   string    `bson:"Имя"`
@@ -29,7 +32,7 @@ type Dashboard_Params struct {
 	SendTo     string `json:"sendTo"`
 	SendAutoAt int    `json:"sendAutoAt"`
 	Page       int    `json:"page"`
-	Test       int    `json:"test"`
+	Templates  bool    `json:"templates"`
 }
 
 type DashboardGetResponse struct {

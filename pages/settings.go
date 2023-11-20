@@ -40,9 +40,20 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 		if params.UUID != "" {
 			_, exists := functions.AuthUsers[params.UUID]
 			if !exists {
-				log.Println("=0687ad=", exists)
+				return
 			}
 		}
+		if params.Templates {
+			log.Println("=c45a2f=", params.Templates)
+			temp_list := GetTemplates()
+
+			temp_listJson, err := json.Marshal(temp_list)
+			if err != nil {
+				fmt.Println("error:", err)
+			}
+			rw.Write(temp_listJson)
+		}
+
 		settings := GetSettings()
 		events := GetEvents()
 
@@ -97,8 +108,21 @@ func CheckConnectionToEmail(settingsData models.SettingsUpload) string {
 	return "Соединение с почтовым ящиком установлено."
 }
 
+func GetTemplates() []string {
+	filter := bson.M{}
 
+	var templates []models.TemplatesList
 
+	cursor := db.Find(filter, "templates")
+	if err := cursor.All(context.TODO(), &templates); err != nil {
+		log.Println("=8922b7=", err)
+	}
+	var names []string
+	for _, template := range templates {
+		names = append(names, template.Name)
+	}
+	return names
+}
 
 func uploadSettings(rw http.ResponseWriter, request *http.Request) models.DashboardPostResponse {
 	var response models.DashboardPostResponse

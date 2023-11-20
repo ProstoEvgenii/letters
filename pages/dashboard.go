@@ -29,11 +29,9 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	var SendEmailResult string
 
 	if params.UUID != "" {
-		value, exists := functions.AuthUsers[params.UUID]
-		// log.Println("=a91e22=", value)
+		_, exists := functions.AuthUsers[params.UUID]
 		if !exists {
-			log.Println("=0687ad=", exists, value)
-			log.Println("=3e6638=")
+			return
 		}
 	}
 
@@ -43,9 +41,6 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 		log.Println("=bcb70e=", userTest)
 		SendEmailResult = functions.SendTest(userTest, "birthday")
 	}
-	if params.Test != 0 {
-		log.Println("=4285a3=")
-	}
 
 	usersCount, logsCount, birthdaysListLen, todayLogsNumber := Dashboard()
 	response := models.DashboardGetResponse{
@@ -54,7 +49,6 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 		CountBirtdays: birthdaysListLen,
 		CountLogs:     todayLogsNumber,
 		SendEmail:     SendEmailResult,
-		// SendAutoAt:    sendAutoAt,
 	}
 
 	itemCountJson, err := json.Marshal(response)
