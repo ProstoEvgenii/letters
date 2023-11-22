@@ -16,7 +16,7 @@ type Templates struct {
 	IndexHTML string `bson:"indexHTML"`
 }
 type TemplatesList struct {
-	Name      string `bson:"name"`
+	Name string `bson:"name"`
 }
 
 type Logs struct {
@@ -32,7 +32,7 @@ type Dashboard_Params struct {
 	SendTo     string `json:"sendTo"`
 	SendAutoAt int    `json:"sendAutoAt"`
 	Page       int    `json:"page"`
-	Templates  bool    `json:"templates"`
+	Templates  bool   `json:"templates"`
 }
 
 type DashboardGetResponse struct {
@@ -59,6 +59,7 @@ type UsersUpload struct {
 ////=======Settings
 type SettingsUpload struct {
 	Records    []Events `json:"records"`
+	Templates  []string `json:"templates"`
 	EmailLogin string   `json:"emailLogin" bson:"emailLogin"`
 	EmailPass  string   `json:"emailPass" bson:"emailPass"`
 	Smtp       string   `json:"smtp" bson:"smtp"`
@@ -108,6 +109,7 @@ type Events struct {
 	MustSend     time.Time `json:"mustSend" bson:"mustSend"`
 	SendAt       int64     `json:"sendAt" bson:"sendAt"`
 	From         string    `json:"from" bson:"from"`
+	Active       bool      `json:"active"`
 }
 
 // type GetDataBaseResponse struct {

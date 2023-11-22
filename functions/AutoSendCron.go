@@ -20,7 +20,7 @@ func AutoSend() {
 	currentHour := int64(today.Hour())
 	currentMinute := today.Minute()
 	for _, event := range events {
-		if event.IsDaily {
+		if event.IsDaily && event.Active {
 			if event.MustSend != currentDate {
 				UpdateEvent(event.Name, false)
 			} else if event.SendAt == currentHour && currentMinute == 23 && !event.IsSent {
@@ -30,7 +30,7 @@ func AutoSend() {
 			}
 		}
 
-		if !event.IsDaily && event.Day == currentDay && event.Month == currentMonth {
+		if !event.IsDaily && event.Active && event.Day == currentDay && event.Month == currentMonth {
 			if event.IsSent {
 				log.Println("=69734c=", event.Name)
 				UpdateEvent(event.Name, false)

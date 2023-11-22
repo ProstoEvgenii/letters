@@ -43,7 +43,7 @@ func UploadEvents(rw http.ResponseWriter, request *http.Request) models.Dashboar
 		response.Err = "Ошибка"
 		return response
 	}
-	log.Println("=c6d3a6=", eventsData)
+	log.Println("", eventsData)
 	filter := bson.M{
 		"name": eventsData.Name,
 	}
@@ -57,6 +57,7 @@ func UploadEvents(rw http.ResponseWriter, request *http.Request) models.Dashboar
 		"subject":      eventsData.Subject,
 		"sendAt":       eventsData.SendAt,
 		"templateName": eventsData.TemplateName,
+		"active":       eventsData.Active,
 	}}
 
 	settingInserted := db.InsertIfNotExists(filter, update, "events")

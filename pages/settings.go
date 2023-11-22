@@ -43,15 +43,10 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 				return
 			}
 		}
+		var templatesName_list []string
 		if params.Templates {
-			log.Println("=c45a2f=", params.Templates)
-			temp_list := GetTemplates()
-
-			temp_listJson, err := json.Marshal(temp_list)
-			if err != nil {
-				fmt.Println("error:", err)
-			}
-			rw.Write(temp_listJson)
+			templatesName_list = GetTemplates()
+			// log.Println("=c8160e=", templatesName_list)
 		}
 
 		settings := GetSettings()
@@ -59,6 +54,7 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 
 		response := models.SettingsUpload{
 			Records:    events,
+			Templates:  templatesName_list,
 			EmailLogin: settings.EmailLogin,
 			Smtp:       settings.Smtp,
 			Port:       settings.Port,
@@ -137,7 +133,7 @@ func uploadSettings(rw http.ResponseWriter, request *http.Request) models.Dashbo
 	var settingsData models.SettingsUpload
 
 	if err := json.Unmarshal(body, &settingsData); err != nil {
-		log.Println("=324528f5=", "Ошибка разбора данных JSON", "uploadSettings")
+		log.Println("", "Ошибка разбора данных JSON", "uploadSettings")
 		response.Err = "Ошибка"
 		return response
 	}
@@ -154,7 +150,6 @@ func uploadSettings(rw http.ResponseWriter, request *http.Request) models.Dashbo
 		"_id": objectId,
 	}
 	update := bson.M{"$set": bson.M{
-		// "template":   settingsData.Template,
 		"emailLogin": settingsData.EmailLogin,
 		"emailPass":  settingsData.EmailPass,
 		"smtp":       settingsData.Smtp,
