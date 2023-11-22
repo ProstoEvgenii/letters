@@ -38,7 +38,6 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	if params.SendTo != "" {
 		var userTest models.Users
 		userTest.FirstName, userTest.LastName, userTest.Email = "Иван", "Иванов", params.SendTo
-		log.Println("=bcb70e=", userTest)
 		SendEmailResult = functions.SendTest(userTest, "birthday")
 	}
 

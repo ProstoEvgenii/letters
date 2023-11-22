@@ -33,6 +33,7 @@ type Dashboard_Params struct {
 	SendAutoAt int    `json:"sendAutoAt"`
 	Page       int    `json:"page"`
 	Templates  bool   `json:"templates"`
+	Seach      string `json:"seach"`
 }
 
 type DashboardGetResponse struct {

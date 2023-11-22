@@ -23,7 +23,6 @@ func UploadEventsHandler(rw http.ResponseWriter, request *http.Request) {
 		rw.Write(eventAdded)
 		return
 	}
-
 	return
 }
 func UploadEvents(rw http.ResponseWriter, request *http.Request) models.DashboardPostResponse {
