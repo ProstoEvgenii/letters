@@ -26,6 +26,7 @@ var router = map[string]func(http.ResponseWriter, *http.Request){
 	"History":   pages.HistoryHandler,
 	"UserAuth":  pages.AuthHandler,
 	"Events":    pages.UploadEventsHandler,
+	"Templates": pages.UploadTemplateHandler,
 }
 
 func HandleRequest(rw http.ResponseWriter, request *http.Request) {

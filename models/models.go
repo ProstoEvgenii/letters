@@ -12,8 +12,8 @@ type Users struct {
 	Unsubscribe bool      `bson:"unsubscribe"`
 }
 type Templates struct {
-	Name      string `bson:"name"`
-	IndexHTML string `bson:"indexHTML"`
+	Name      string `bson:"name" json:"name"`
+	IndexHTML string `bson:"indexHTML" json:"indexHtml"`
 }
 type TemplatesList struct {
 	Name string `bson:"name"`

@@ -67,7 +67,6 @@ func Dashboard() (int64, int64, int, int64) {
 
 	today := time.Now().UTC().Truncate(24 * time.Hour)
 	logsLogsToday := db.CountDocuments(bson.M{"dateCreate": today}, "logs")
-	// sendAutoAt := GetSettings().SendAutoAt
 	birthdays_list := functions.CreateBirthdaysSlice()
 
 	return usersCount, logsCount, len(birthdays_list), logsLogsToday
