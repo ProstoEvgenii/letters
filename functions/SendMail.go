@@ -154,7 +154,7 @@ func SendEmail(user models.Users, subject string, html string, settings models.S
 		log.Println("=SendEmail79fc04 Отправка письма=", err)
 		return "Ошибка при отправкe сообщения"
 	}
-	fmt.Printf("Поздравление отправлено:%s", user.Email)
+	fmt.Printf("Поздравление отправлено:%s\n", user.Email)
 	return "ok"
 }
 func CreateLog(user models.Users, eventName string) int64 {

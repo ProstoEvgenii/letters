@@ -118,7 +118,7 @@ func uploadUsers(w http.ResponseWriter, r *http.Request) {
 		var event models.Events
 		result := db.FindOne(filter, "events")
 		result.Decode(&event)
-		if event.Name == "День рождения" && event.IsSent == true {
+		if event.Name == "День рождения" && event.IsSent == true && event.Active {
 			functions.CheckLogsAndSendEmail(event)
 		}
 	}

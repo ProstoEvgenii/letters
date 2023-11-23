@@ -23,11 +23,25 @@ func HistoryHandler(rw http.ResponseWriter, request *http.Request) {
 	}
 
 	if request.Method == "GET" {
+		today := time.Now().UTC().Truncate(24 * time.Hour)
+		yesterday := time.Now().UTC().AddDate(0, 0, -1).Truncate(24 * time.Hour)
+
+		logsCount := db.CountDocuments(bson.M{}, "logs")
+		todayLogsNumber := db.CountDocuments(bson.M{"dateCreate": today}, "logs")
+		yesterdayLogsNumber := db.CountDocuments(bson.M{"dateCreate": yesterday}, "logs")
+
 		params := new(models.Dashboard_Params)
 		if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
 			log.Println("=Params schema Error News_=", err)
 		}
-
+		if params.UUID != "" {
+			_, exists := functions.AuthUsers[params.UUID]
+			if !exists {
+				return
+			}
+		}
+		limitPerPage := 15
+		page := 1
 		filter := bson.M{}
 
 		if params.Seach != "" {
@@ -39,34 +53,27 @@ func HistoryHandler(rw http.ResponseWriter, request *http.Request) {
 				},
 			}
 		}
-		if params.UUID != "" {
-			_, exists := functions.AuthUsers[params.UUID]
-			if !exists {
-				return
-			}
+
+		if params.Page != 0 {
+			page = params.Page
 		}
-
-		logsCount := db.CountDocuments(bson.M{}, "logs")
-		today := time.Now().UTC().Truncate(24 * time.Hour)
-		yesterday := time.Now().UTC().AddDate(0, 0, -1).Truncate(24 * time.Hour)
-		todayLogsNumber := getLogs(today)
-		yesterdayLogsNumber := getLogs(yesterday)
-
-		cursor := db.Find(filter, "logs")
+		skip := limitPerPage * (page - 1)
+		totalFound := db.CountDocuments(filter, "logs")
+		cursor := db.FindSkip(filter, "logs", skip, limitPerPage)
 		var logsSlice []models.Logs
 		if err := cursor.All(context.TODO(), &logsSlice); err != nil {
 			log.Println("Cursor All Error Database", err)
-			rw.Write([]byte("{}"))
-			return
+			response.Records = []models.Logs{}
 		}
 		if len(logsSlice) == 0 {
-			rw.Write([]byte("{}"))
-			return
+			response.Records = []models.Logs{}
+			// rw.Write([]byte("{}"))
 		}
 
 		response = models.GetHistoryResponse{
 			Records:        logsSlice,
 			LogsCount:      logsCount,
+			TotalFound:     totalFound,
 			TodayLogsCount: todayLogsNumber,
 			// TommorowLogsCount:  tomorrowLogsNumber,
 			YesterdayLogsCount: yesterdayLogsNumber,
@@ -82,15 +89,15 @@ func HistoryHandler(rw http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func getLogs(date time.Time) int {
-	filter := bson.M{
-		"dateCreate": date,
-	}
-	cursor := db.Find(filter, "logs")
-	var logs []models.Logs
-	if err := cursor.All(context.TODO(), &logs); err != nil {
-		log.Println("=8922b7=", err)
-	}
-	return len(logs)
+// func getLogs(date time.Time) int {
+// 	filter := bson.M{
+// 		"dateCreate": date,
+// 	}
+// 	cursor := db.Find(filter, "logs")
+// 	var logs []models.Logs
+// 	if err := cursor.All(context.TODO(), &logs); err != nil {
+// 		log.Println("=8922b7=", err)
+// 	}
+// 	return len(logs)
 
-}
+// }

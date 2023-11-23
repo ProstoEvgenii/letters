@@ -72,6 +72,7 @@ type SettingsUpload struct {
 
 type GetDataBaseResponse struct {
 	Records    []Users `json:"records"`
+	TotalFound int64   `json:"totalFound"`
 	UsersCount int64   `json:"usersCount"`
 	PageNumber int     `json:"pageNumber"`
 }
@@ -81,9 +82,10 @@ type GetDataBaseResponse struct {
 type GetHistoryResponse struct {
 	Records            []Logs `json:"records"`
 	LogsCount          int64  `json:"logsCount"`
-	TodayLogsCount     int    `json:"todayLgsCount"`
-	TommorowLogsCount  int    `json:"tommorowLogsCount"`
-	YesterdayLogsCount int    `json:"yesterdayLogsCount"`
+	TotalFound         int64  `json:"totalFound"`
+	TodayLogsCount     int64  `json:"todayLogsCount"`
+	TommorowLogsCount  int64  `json:"tommorowLogsCount"`
+	YesterdayLogsCount int64  `json:"yesterdayLogsCount"`
 }
 
 //Auth

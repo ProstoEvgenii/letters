@@ -22,7 +22,7 @@ func AutoSend() {
 		if event.IsDaily && event.Active {
 			if event.MustSend != currentDate {
 				UpdateEvent(event.Name, false)
-			} else if event.SendAt == currentHour && currentMinute == 45 && !event.IsSent {
+			} else if event.SendAt == currentHour && currentMinute == 13 && !event.IsSent {
 				log.Println("=700beb=", "Daily", event.Name)
 				CheckLogsAndSendEmail(event)
 				UpdateEvent(event.Name, true)

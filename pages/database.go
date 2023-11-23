@@ -27,7 +27,6 @@ func DatabaseHandler(rw http.ResponseWriter, request *http.Request) {
 		filter := bson.M{}
 		limitPerPage := 15
 		page := 1
-		skip := limitPerPage * (page - 1)
 
 		if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
 			log.Println("=Params schema Error Database=", err)
@@ -43,7 +42,7 @@ func DatabaseHandler(rw http.ResponseWriter, request *http.Request) {
 		if params.Page != 0 {
 			page = params.Page
 		}
-
+		skip := limitPerPage * (page - 1)
 		if params.Seach != "" {
 			filter = bson.M{
 				"$or": []bson.M{
@@ -53,7 +52,7 @@ func DatabaseHandler(rw http.ResponseWriter, request *http.Request) {
 				},
 			}
 		}
-
+		totalFound := db.CountDocuments(filter, "users")
 		cursor := db.FindSkip(filter, "users", skip, limitPerPage)
 		var usersSlice []models.Users
 		if err := cursor.All(context.TODO(), &usersSlice); err != nil {
@@ -63,6 +62,7 @@ func DatabaseHandler(rw http.ResponseWriter, request *http.Request) {
 		}
 		response := models.GetDataBaseResponse{
 			Records:    usersSlice,
+			TotalFound: totalFound,
 			UsersCount: usersCount,
 			PageNumber: page,
 		}
