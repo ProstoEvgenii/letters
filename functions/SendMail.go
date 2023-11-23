@@ -73,7 +73,7 @@ func SendTest(user models.Users, templateName string) string {
 		return fmt.Sprintf("Шаблона %s не существует", templateName)
 	}
 
-	err := SendEmail(user, settings, templateName, "test")
+	err := SendEmail(user, "Teстовое со", html, settings)
 	if err != "ok" {
 		return err
 	}
@@ -81,18 +81,21 @@ func SendTest(user models.Users, templateName string) string {
 	return fmt.Sprintf("Пользователь %s поздравлен", user.Email)
 }
 
-func CheckLogsAndSendEmail(event models.Events, settings models.SettingsUpload) string {
-	birthdays_list := CreateBirthdaysSlice()
+// Пока работает только с днем рождения.
+func CheckLogsAndSendEmail(event models.Events) string {
+	birthdays_list := CreateBirthdaysSlice() //Получил выборку пользователей с днем рождения
 	if len(birthdays_list) == 0 {
 		log.Println("=91c8c4=", "Нет Дней рождений сегодня")
 		return "Нет Дней рождений сегодня"
 	}
+	html := GetTemplate(event.TemplateName)
+	settings := GetSettings()
 	emailSent := 0
 	for _, user := range birthdays_list {
-		result := CreateLog(user)
+		result := CreateLog(user, event.Name)
 		if result != 0 {
 			//Если результат создания лога == 0 ,значит лог с таким email существует и поздравлять его не нужно
-			err := SendEmail(user, settings, event.TemplateName, event.Subject)
+			err := SendEmail(user, event.Subject, html, settings)
 			if err != "ok" {
 				return err
 			}
@@ -106,9 +109,9 @@ func CheckLogsAndSendEmail(event models.Events, settings models.SettingsUpload) 
 		log.Printf("Поздравлено %d пользователей", emailSent)
 		return fmt.Sprintf("Поздравлено %d пользователей", emailSent)
 	}
-
 }
-func SendToEverybody() {
+
+func SendToEverybody(event models.Events) {
 	filter := bson.M{}
 	cursor := db.Find(filter, "users")
 	var users []models.Users
@@ -116,12 +119,18 @@ func SendToEverybody() {
 	if err != nil {
 		log.Println("=84ce91=", err)
 	}
-	log.Println("=e846c2=",users)
+
+	html := GetTemplate(event.TemplateName)
+	settings := GetSettings()
+	for _, user := range users {
+		CreateLog(user, event.Name)
+		SendEmail(user, event.Subject, html, settings)
+	}
 }
-func SendEmail(user models.Users, settings models.SettingsUpload, templateName string, subject string) string {
+func SendEmail(user models.Users, subject string, html string, settings models.SettingsUpload) string {
+
 	first_name := user.FirstName
 	last_name := user.LastName
-	html := GetTemplate(templateName)
 
 	replacer := strings.NewReplacer("${first_name}", first_name, "${last_name}", last_name, "${email}", user.Email)
 
@@ -148,15 +157,15 @@ func SendEmail(user models.Users, settings models.SettingsUpload, templateName s
 	fmt.Printf("Поздравление отправлено:%s", user.Email)
 	return "ok"
 }
-func CreateLog(user models.Users) int64 {
+func CreateLog(user models.Users, eventName string) int64 {
 	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
 	filter := bson.M{
-		"event":      "День рождения",
+		"event":      eventName,
 		"E-mail":     user.Email,
 		"dateCreate": currentDate,
 	}
 	update := bson.M{"$setOnInsert": bson.M{
-		"event":         "День рождения",
+		"event":         eventName,
 		"Имя":           user.FirstName,
 		"Фамилия":       user.LastName,
 		"Отчество":      user.MiddleName,

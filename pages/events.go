@@ -14,6 +14,7 @@ import (
 
 func UploadEventsHandler(rw http.ResponseWriter, request *http.Request) {
 	if request.Method == "POST" {
+		
 		response := UploadEvents(rw, request)
 		eventAdded, err := json.Marshal(response)
 		if err != nil {
@@ -27,7 +28,7 @@ func UploadEventsHandler(rw http.ResponseWriter, request *http.Request) {
 }
 func UploadEvents(rw http.ResponseWriter, request *http.Request) models.DashboardPostResponse {
 	var response models.DashboardPostResponse
-
+	
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		log.Println("=fa78f5=", "Ошибка чтения данных из запроса", "UploadEvents")

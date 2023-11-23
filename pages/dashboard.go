@@ -119,8 +119,7 @@ func uploadUsers(w http.ResponseWriter, r *http.Request) {
 		result := db.FindOne(filter, "events")
 		result.Decode(&event)
 		if event.Name == "День рождения" && event.IsSent == true {
-			settings := GetSettings()
-			functions.CheckLogsAndSendEmail(event, settings)
+			functions.CheckLogsAndSendEmail(event)
 		}
 	}
 

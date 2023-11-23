@@ -16,7 +16,7 @@ import (
 )
 
 func HistoryHandler(rw http.ResponseWriter, request *http.Request) {
-
+	response := models.GetHistoryResponse{}
 	if request.Method == "POST" {
 
 		rw.Write([]byte("Привет"))
@@ -27,24 +27,32 @@ func HistoryHandler(rw http.ResponseWriter, request *http.Request) {
 		if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
 			log.Println("=Params schema Error News_=", err)
 		}
+
+		filter := bson.M{}
+
+		if params.Seach != "" {
+			filter = bson.M{
+				"$or": []bson.M{
+					{"Имя": bson.M{"$regex": params.Seach, "$options": "i"}},
+					{"Фамилия": bson.M{"$regex": params.Seach, "$options": "i"}},
+					{"E-mail": bson.M{"$regex": params.Seach, "$options": "i"}},
+				},
+			}
+		}
 		if params.UUID != "" {
 			_, exists := functions.AuthUsers[params.UUID]
-			// log.Println("=d35bfe=", functions.AuthUsers)
 			if !exists {
 				return
-				// log.Println("=0687ad=", exists)
-				// log.Println("=855a9b=", "Не авторизован")
 			}
 		}
 
 		logsCount := db.CountDocuments(bson.M{}, "logs")
 		today := time.Now().UTC().Truncate(24 * time.Hour)
 		yesterday := time.Now().UTC().AddDate(0, 0, -1).Truncate(24 * time.Hour)
-		// tomorrow := time.Now().UTC().AddDate(0, 0, 1).Truncate(24 * time.Hour)
 		todayLogsNumber := getLogs(today)
 		yesterdayLogsNumber := getLogs(yesterday)
 
-		cursor := db.Find(bson.M{}, "logs")
+		cursor := db.Find(filter, "logs")
 		var logsSlice []models.Logs
 		if err := cursor.All(context.TODO(), &logsSlice); err != nil {
 			log.Println("Cursor All Error Database", err)
@@ -56,7 +64,7 @@ func HistoryHandler(rw http.ResponseWriter, request *http.Request) {
 			return
 		}
 
-		response := models.GetHistoryResponse{
+		response = models.GetHistoryResponse{
 			Records:        logsSlice,
 			LogsCount:      logsCount,
 			TodayLogsCount: todayLogsNumber,
@@ -75,7 +83,6 @@ func HistoryHandler(rw http.ResponseWriter, request *http.Request) {
 }
 
 func getLogs(date time.Time) int {
-	// currentDate := time.Now().UTC().Truncate(24 * time.Hour)
 	filter := bson.M{
 		"dateCreate": date,
 	}

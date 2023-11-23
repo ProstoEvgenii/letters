@@ -12,7 +12,6 @@ import (
 
 func AutoSend() {
 	events := GetEvents()
-	settings := GetSettings()
 	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
 	today := time.Now()
 	currentDay := int64(today.Day())
@@ -23,9 +22,9 @@ func AutoSend() {
 		if event.IsDaily && event.Active {
 			if event.MustSend != currentDate {
 				UpdateEvent(event.Name, false)
-			} else if event.SendAt == currentHour && currentMinute == 23 && !event.IsSent {
+			} else if event.SendAt == currentHour && currentMinute == 45 && !event.IsSent {
 				log.Println("=700beb=", "Daily", event.Name)
-				CheckLogsAndSendEmail(event, settings)
+				CheckLogsAndSendEmail(event)
 				UpdateEvent(event.Name, true)
 			}
 		}
@@ -34,9 +33,9 @@ func AutoSend() {
 			if event.IsSent {
 				log.Println("=69734c=", event.Name)
 				UpdateEvent(event.Name, false)
-			} else if !event.IsSent && event.SendAt == currentHour && currentMinute == 23 {
+			} else if !event.IsSent && event.SendAt == currentHour && currentMinute == 46 {
 				log.Println("=72e334=", "Отправлено", event.Name)
-				SendToEverybody()
+				SendToEverybody(event)
 				UpdateEvent(event.Name, true)
 			}
 		}

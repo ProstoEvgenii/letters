@@ -45,7 +45,6 @@ func DatabaseHandler(rw http.ResponseWriter, request *http.Request) {
 		}
 
 		if params.Seach != "" {
-			log.Println("=d8b655=", params.Seach)
 			filter = bson.M{
 				"$or": []bson.M{
 					{"Имя": bson.M{"$regex": params.Seach, "$options": "i"}},
@@ -62,7 +61,6 @@ func DatabaseHandler(rw http.ResponseWriter, request *http.Request) {
 			rw.Write([]byte("{}"))
 			return
 		}
-
 		response := models.GetDataBaseResponse{
 			Records:    usersSlice,
 			UsersCount: usersCount,
