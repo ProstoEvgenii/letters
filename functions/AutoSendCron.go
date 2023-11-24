@@ -18,11 +18,12 @@ func AutoSend() {
 	currentMonth := int64(today.Month())
 	currentHour := int64(today.Hour())
 	currentMinute := today.Minute()
+
 	for _, event := range events {
 		if event.IsDaily && event.Active {
 			if event.MustSend != currentDate {
 				UpdateEvent(event.Name, false)
-			} else if event.SendAt == currentHour && currentMinute == 13 && !event.IsSent {
+			} else if event.SendAt == currentHour && currentMinute == 00 && !event.IsSent {
 				log.Println("=700beb=", "Daily", event.Name)
 				CheckLogsAndSendEmail(event)
 				UpdateEvent(event.Name, true)
@@ -33,7 +34,7 @@ func AutoSend() {
 			if event.IsSent {
 				log.Println("=69734c=", event.Name)
 				UpdateEvent(event.Name, false)
-			} else if !event.IsSent && event.SendAt == currentHour && currentMinute == 46 {
+			} else if !event.IsSent && event.SendAt == currentHour && currentMinute == 00 {
 				log.Println("=72e334=", "Отправлено", event.Name)
 				SendToEverybody(event)
 				UpdateEvent(event.Name, true)
