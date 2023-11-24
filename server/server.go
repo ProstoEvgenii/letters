@@ -56,7 +56,7 @@ func Unsubcribe(rw http.ResponseWriter, request *http.Request) {
 
 	if params.Email != "" {
 
-		log.Println("=0b54eb=", params.Email)
+		// log.Println("=0b54eb=", params.Email)
 		filter := bson.M{
 			"E-mail": params.Email,
 		}

@@ -123,8 +123,11 @@ func SendToEverybody(event models.Events) {
 	html := GetTemplate(event.TemplateName)
 	settings := GetSettings()
 	for _, user := range users {
-		CreateLog(user, event.Name)
-		SendEmail(user, event.Subject, html, settings)
+		if !user.Unsubscribe {
+			CreateLog(user, event.Name)
+			SendEmail(user, event.Subject, html, settings)
+		}
+
 	}
 }
 func SendEmail(user models.Users, subject string, html string, settings models.SettingsUpload) string {

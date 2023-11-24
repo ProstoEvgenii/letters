@@ -18,8 +18,8 @@ func main() {
 
 	}
 	db.Connect()
-	slice := functions.CreateBirthdaysSlice()
-	log.Println("=22b5b8=", slice)
+	// slice := functions.CreateBirthdaysSlice()
+	// log.Println("=22b5b8=", slice)
 	functions.AutoSend()
 	server.Start(host)
 
