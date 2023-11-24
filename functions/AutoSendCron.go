@@ -42,7 +42,7 @@ func AutoSend() {
 		}
 	}
 
-	time.AfterFunc(time.Duration(3)*time.Second, func() {
+	time.AfterFunc(time.Duration(60)*time.Second, func() {
 		AutoSend()
 	})
 }
