@@ -11,13 +11,6 @@ type Users struct {
 	Email       string    `bson:"E-mail"`
 	Unsubscribe bool      `bson:"unsubscribe"`
 }
-type Templates struct {
-	Name      string `bson:"name" json:"name"`
-	IndexHTML string `bson:"indexHTML" json:"indexHtml"`
-}
-type TemplatesList struct {
-	Name string `bson:"name"`
-}
 
 type Logs struct {
 	FirstName   string    `bson:"Имя"`
@@ -65,11 +58,10 @@ type SettingsUpload struct {
 	EmailPass  string   `json:"emailPass" bson:"emailPass"`
 	Smtp       string   `json:"smtp" bson:"smtp"`
 	Port       string   `json:"port" bson:"port"`
-	SendAutoAt int      `bson:"sendAutoAt"`
+	UUID       string   `json:"uuid"`
 }
 
 ///========DataBase
-
 type GetDataBaseResponse struct {
 	Records    []Users `json:"records"`
 	TotalFound int64   `json:"totalFound"`
@@ -78,7 +70,6 @@ type GetDataBaseResponse struct {
 }
 
 //======History
-
 type GetHistoryResponse struct {
 	Records            []Logs `json:"records"`
 	LogsCount          int64  `json:"logsCount"`
@@ -104,6 +95,7 @@ type Unsubscribe struct {
 type Events struct {
 	Name         string    `json:"name" bson:"name"`
 	IsDaily      bool      `json:"isDaily" bson:"isDaily"`
+	Type         string    `bson:"type"`
 	IsSent       bool      `json:"isSent" bson:"isSent"`
 	Subject      string    `json:"subject" bson:"subject"`
 	Day          int64     `json:"day" bson:"day"`
@@ -113,9 +105,14 @@ type Events struct {
 	SendAt       int64     `json:"sendAt" bson:"sendAt"`
 	From         string    `json:"from" bson:"from"`
 	Active       bool      `json:"active"`
+	UUID         string    `json:"uuid"`
 }
 
-// type GetDataBaseResponse struct {
-// 	Records    []byte
-// 	UsersCount int64
-// }
+//Templates
+type Templates struct {
+	Name      string `bson:"name" json:"name"`
+	IndexHTML string `bson:"indexHTML" json:"indexHtml"`
+}
+type TemplatesList struct {
+	Name string `bson:"name"`
+}

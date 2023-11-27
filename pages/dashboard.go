@@ -28,11 +28,9 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	}
 	var SendEmailResult string
 
-	if params.UUID != "" {
-		_, exists := functions.AuthUsers[params.UUID]
-		if !exists {
-			return
-		}
+	_, exists := functions.AuthUsers[params.UUID]
+	if !exists {
+		return
 	}
 
 	if params.SendTo != "" {
@@ -66,7 +64,7 @@ func Dashboard() (int64, int64, int, int64) {
 
 	today := time.Now().UTC().Truncate(24 * time.Hour)
 	logsLogsToday := db.CountDocuments(bson.M{"dateCreate": today}, "logs")
-	birthdays_list := functions.CreateBirthdaysSlice()
+	birthdays_list, _ := functions.CreateBirthdaysSlice()
 
 	return usersCount, logsCount, len(birthdays_list), logsLogsToday
 }
@@ -75,6 +73,12 @@ func uploadUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Max-Age", "15")
+
+	UUID := r.FormValue("UUID")
+	_, exists := functions.AuthUsers[UUID]
+	if !exists {
+		return
+	}
 	file, _, err := r.FormFile("jsonFile")
 	if err != nil {
 		http.Error(w, "Не удалось получить файл", http.StatusBadRequest)
@@ -115,12 +119,24 @@ func uploadUsers(w http.ResponseWriter, r *http.Request) {
 		filter := bson.M{
 			"_id": objectId,
 		}
-		var event models.Events
+		var eventBirth models.Events
 		result := db.FindOne(filter, "events")
-		result.Decode(&event)
-		if event.Name == "День рождения" && event.IsSent == true && event.Active {
-			functions.CheckLogsAndSendEmail(event)
+		result.Decode(&eventBirth)
+
+		objectId, _ = primitive.ObjectIDFromHex("65647ad3a62203657bf27b62")
+		filter = bson.M{
+			"_id": objectId,
 		}
+		var eventAnniversery models.Events
+		result = db.FindOne(filter, "events")
+		result.Decode(&eventAnniversery)
+		birthdays_list, anniversary_list := functions.CreateBirthdaysSlice()
+		if eventBirth.Name == "День рождения" && eventBirth.IsSent == true && eventBirth.Active {
+			functions.CheckLogsAndSendEmail(eventBirth, birthdays_list)
+		} else if eventAnniversery.Name == "День рождения" && eventAnniversery.IsSent == true && eventAnniversery.Active {
+			functions.CheckLogsAndSendEmail(eventAnniversery, anniversary_list)
+		}
+
 	}
 
 	response := models.DashboardPostResponse{

@@ -17,11 +17,14 @@ func main() {
 		host = ":80"
 
 	}
+
 	db.Connect()
-	// slice := functions.CreateBirthdaysSlice()
-	// log.Println("=22b5b8=", slice)
+
 	functions.AutoSend()
+
+	// _, anniversary_list := functions.CreateBirthdaysSlice()
+
+	// log.Println("=51f3bc=", anniversary_list)
 	server.Start(host)
 
 }
-

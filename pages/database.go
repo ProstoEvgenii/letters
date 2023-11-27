@@ -32,11 +32,9 @@ func DatabaseHandler(rw http.ResponseWriter, request *http.Request) {
 			log.Println("=Params schema Error Database=", err)
 		}
 
-		if params.UUID != "" {
-			_, exists := functions.AuthUsers[params.UUID]
-			if !exists {
-				return
-			}
+		_, exists := functions.AuthUsers[params.UUID]
+		if !exists {
+			return
 		}
 
 		if params.Page != 0 {

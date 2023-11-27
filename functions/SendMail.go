@@ -24,7 +24,7 @@ func GetSettings() models.SettingsUpload {
 
 	return settings
 }
-func CreateBirthdaysSlice() []models.Users {
+func CreateBirthdaysSlice() ([]models.Users, []models.Users) {
 	today := time.Now()
 	filter := bson.M{}
 	cursor := db.Find(filter, "users")
@@ -34,13 +34,19 @@ func CreateBirthdaysSlice() []models.Users {
 		log.Println("=84ce91=", err)
 	}
 	var birthdays_list []models.Users
+	var anniversary_list []models.Users
 	for _, user := range users {
 		if user.DateOfBirth.Day() == today.Day() && user.DateOfBirth.Month() == today.Month() && !user.Unsubscribe {
-			birthdays_list = append(birthdays_list, user)
+			age := today.Year() - user.DateOfBirth.Year()
+			if age >= 50 && age%5 == 0 {
+				anniversary_list = append(anniversary_list, user)
+			} else {
+				birthdays_list = append(birthdays_list, user)
+			}
 		}
 	}
 
-	return birthdays_list
+	return birthdays_list, anniversary_list
 }
 
 func GetTemplate(templateName string) string {
@@ -82,16 +88,17 @@ func SendTest(user models.Users, templateName string) string {
 }
 
 // Пока работает только с днем рождения.
-func CheckLogsAndSendEmail(event models.Events) string {
-	birthdays_list := CreateBirthdaysSlice() //Получил выборку пользователей с днем рождения
-	if len(birthdays_list) == 0 {
-		log.Println("=91c8c4=", "Нет Дней рождений сегодня")
-		return "Нет Дней рождений сегодня"
-	}
+func CheckLogsAndSendEmail(event models.Events, users []models.Users) string {
+	// birthdays_list, _ := CreateBirthdaysSlice() //Получил выборку пользователей с днем рождения
+	// if len(birthdays_list) == 0 {
+	// 	log.Println("=91c8c4=", "Нет Дней рождений сегодня")
+	// 	return "Нет Дней рождений сегодня"
+	// }
 	html := GetTemplate(event.TemplateName)
 	settings := GetSettings()
 	emailSent := 0
-	for _, user := range birthdays_list {
+
+	for _, user := range users {
 		result := CreateLog(user, event.Name)
 		if result != 0 {
 			//Если результат создания лога == 0 ,значит лог с таким email существует и поздравлять его не нужно
@@ -102,6 +109,8 @@ func CheckLogsAndSendEmail(event models.Events) string {
 			emailSent += 1
 		}
 	}
+
+	// if
 	if emailSent == 0 {
 		log.Println("=5c58cc=", "Сегодня все поздравлены")
 		return "Сегодня все поздравлены"
@@ -169,6 +178,7 @@ func CreateLog(user models.Users, eventName string) int64 {
 	}
 	update := bson.M{"$setOnInsert": bson.M{
 		"event":         eventName,
+		
 		"Имя":           user.FirstName,
 		"Фамилия":       user.LastName,
 		"Отчество":      user.MiddleName,

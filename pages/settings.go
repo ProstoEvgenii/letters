@@ -37,16 +37,13 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 		if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
 			log.Println("=Params schema Error News_=", err)
 		}
-		if params.UUID != "" {
-			_, exists := functions.AuthUsers[params.UUID]
-			if !exists {
-				return
-			}
+		_, exists := functions.AuthUsers[params.UUID]
+		if !exists {
+			return
 		}
 		var templatesName_list []string
 		if params.Templates {
 			templatesName_list = GetTemplates()
-			// log.Println("=c8160e=", templatesName_list)
 		}
 
 		settings := GetSettings()
@@ -129,12 +126,17 @@ func uploadSettings(rw http.ResponseWriter, request *http.Request) models.Dashbo
 		response.Err = "Ошибка"
 		return response
 	}
-
 	var settingsData models.SettingsUpload
 
 	if err := json.Unmarshal(body, &settingsData); err != nil {
 		log.Println("", "Ошибка разбора данных JSON", "uploadSettings")
 		response.Err = "Ошибка"
+		return response
+	}
+	log.Println("=bf12b7=", settingsData.UUID)
+	_, exists := functions.AuthUsers[settingsData.UUID]
+	if !exists {
+		response.Err = "Ошибка Авторизации."
 		return response
 	}
 	result := CheckConnectionToEmail(settingsData)

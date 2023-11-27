@@ -24,12 +24,15 @@ func AutoSend() {
 			if event.MustSend != currentDate {
 				UpdateEvent(event.Name, false)
 			} else if event.SendAt == currentHour && currentMinute == 00 && !event.IsSent {
-				log.Println("=700beb=", "Daily", event.Name)
-				CheckLogsAndSendEmail(event)
+				birthdays_list, anniversary_list := CreateBirthdaysSlice()
+				if event.Type == "anniversary" && len(anniversary_list) != 0 {
+					CheckLogsAndSendEmail(event, anniversary_list)
+				} else if event.Type == "birthday" && len(birthdays_list) != 0 {
+					CheckLogsAndSendEmail(event, birthdays_list)
+				}
 				UpdateEvent(event.Name, true)
 			}
 		}
-
 		if !event.IsDaily && event.Active && event.Day == currentDay && event.Month == currentMonth {
 			if event.IsSent {
 				log.Println("=69734c=", event.Name)

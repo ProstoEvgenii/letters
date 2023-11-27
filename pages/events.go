@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"letters/db"
+	"letters/functions"
 	"letters/models"
 	"log"
 	"net/http"
@@ -14,7 +15,7 @@ import (
 
 func UploadEventsHandler(rw http.ResponseWriter, request *http.Request) {
 	if request.Method == "POST" {
-		
+
 		response := UploadEvents(rw, request)
 		eventAdded, err := json.Marshal(response)
 		if err != nil {
@@ -27,9 +28,10 @@ func UploadEventsHandler(rw http.ResponseWriter, request *http.Request) {
 	return
 }
 func UploadEvents(rw http.ResponseWriter, request *http.Request) models.DashboardPostResponse {
-	var response models.DashboardPostResponse
 	
+	var response models.DashboardPostResponse
 	body, err := io.ReadAll(request.Body)
+
 	if err != nil {
 		log.Println("=fa78f5=", "Ошибка чтения данных из запроса", "UploadEvents")
 		response.Err = "Ошибка"
@@ -37,13 +39,18 @@ func UploadEvents(rw http.ResponseWriter, request *http.Request) models.Dashboar
 	}
 
 	var eventsData models.Events
-
 	if err := json.Unmarshal(body, &eventsData); err != nil {
 		log.Println("=324528f5=", "Ошибка разбора данных JSON", "UploadEvents")
 		response.Err = "Ошибка"
 		return response
 	}
-	log.Println("", eventsData)
+
+	log.Println("=2f49d7=", eventsData.UUID)
+	_, exists := functions.AuthUsers[eventsData.UUID]
+	if !exists {
+		response.Err = "Ошибка Авторизации"
+		return response
+	}
 	filter := bson.M{
 		"name": eventsData.Name,
 	}

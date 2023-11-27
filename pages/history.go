@@ -34,11 +34,9 @@ func HistoryHandler(rw http.ResponseWriter, request *http.Request) {
 		if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
 			log.Println("=Params schema Error News_=", err)
 		}
-		if params.UUID != "" {
-			_, exists := functions.AuthUsers[params.UUID]
-			if !exists {
-				return
-			}
+		_, exists := functions.AuthUsers[params.UUID]
+		if !exists {
+			return
 		}
 		limitPerPage := 15
 		page := 1
