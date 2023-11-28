@@ -75,7 +75,7 @@ func SendTest(user models.Users, templateName string) string {
 		return fmt.Sprintf("Шаблона %s не существует", templateName)
 	}
 
-	err := SendEmail(user, "Teстовое со", html, settings)
+	err := SendEmail(user, "Teстовое сообщение", html, settings)
 	if err != "ok" {
 		return err
 	}
@@ -99,9 +99,7 @@ func CheckLogsAndSendEmail(event models.Events, users []models.Users) string {
 		if result != 0 {
 			//Если результат создания лога == 0 ,значит лог с таким email существует и поздравлять его не нужно
 			err := SendEmail(user, event.Subject, html, settings)
-			if err != "ok" {
-				return err
-			}
+			log.Println("=c44911=", err)
 			emailSent += 1
 		}
 	}

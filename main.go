@@ -21,10 +21,6 @@ func main() {
 	db.Connect()
 
 	functions.AutoSend()
-
-	// _, anniversary_list := functions.CreateBirthdaysSlice()
-
-	// log.Println("=51f3bc=", anniversary_list)
 	server.Start(host)
 
 }

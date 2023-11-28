@@ -21,21 +21,22 @@ type Logs struct {
 	DateCreate  time.Time `bson:"dateCreate"`
 }
 type Dashboard_Params struct {
-	UUID       string `json:"uuid"`
-	SendTo     string `json:"sendTo"`
-	SendAutoAt int    `json:"sendAutoAt"`
-	Page       int    `json:"page"`
-	Templates  bool   `json:"templates"`
-	Seach      string `json:"seach"`
+	UUID         string `json:"uuid"`
+	SendTo       string `json:"sendTo"`
+	SendTemplate string `json:"sendTemplate"`
+	Page         int    `json:"page"`
+	Templates    bool   `json:"templates"`
+	Seach        string `json:"seach"`
 }
 
 type DashboardGetResponse struct {
-	UsersCount    int64  `json:"usersCount"`
-	LogsCount     int64  `json:"logsCount"`
-	CountBirtdays int    `json:"countBirtdays"`
-	CountLogs     int64  `json:"todaySent"`
-	SendEmail     string `json:"sendEmailresult"`
-	SendAutoAt    int    `json:"sendAutoAt"`
+	Templates     []string `json:"templates"`
+	UsersCount    int64    `json:"usersCount"`
+	LogsCount     int64    `json:"logsCount"`
+	CountBirtdays int      `json:"countBirtdays"`
+	CountLogs     int64    `json:"todaySent"`
+	SendEmail     string   `json:"sendEmailresult"`
+	SendAutoAt    int      `json:"sendAutoAt"`
 }
 type DashboardPostResponse struct {
 	Err               string `json:"err"`

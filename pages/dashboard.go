@@ -36,11 +36,12 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	if params.SendTo != "" {
 		var userTest models.Users
 		userTest.FirstName, userTest.LastName, userTest.Email = "Иван", "Иванов", params.SendTo
-		SendEmailResult = functions.SendTest(userTest, "birthday")
+		SendEmailResult = functions.SendTest(userTest, params.SendTemplate)
 	}
 
-	usersCount, logsCount, birthdaysListLen, todayLogsNumber := Dashboard()
+	usersCount, logsCount, birthdaysListLen, todayLogsNumber, templates := Dashboard()
 	response := models.DashboardGetResponse{
+		Templates:     templates,
 		UsersCount:    usersCount,
 		LogsCount:     logsCount,
 		CountBirtdays: birthdaysListLen,
@@ -58,15 +59,17 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	return
 }
 
-func Dashboard() (int64, int64, int, int64) {
+func Dashboard() (int64, int64, int, int64, []string) {
 	usersCount := db.CountDocuments(bson.M{}, "users")
 	logsCount := db.CountDocuments(bson.M{}, "logs")
 
 	today := time.Now().UTC().Truncate(24 * time.Hour)
 	logsLogsToday := db.CountDocuments(bson.M{"dateCreate": today}, "logs")
-	birthdays_list, _ := functions.CreateBirthdaysSlice()
+	birthdays_list, anniversary_list := functions.CreateBirthdaysSlice()
+	birthdaysNum := len(birthdays_list) + len(anniversary_list)
+	templates := GetTemplates()
 
-	return usersCount, logsCount, len(birthdays_list), logsLogsToday
+	return usersCount, logsCount, birthdaysNum, logsLogsToday, templates
 }
 
 func uploadUsers(w http.ResponseWriter, r *http.Request) {

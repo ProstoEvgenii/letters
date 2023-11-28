@@ -23,7 +23,7 @@ func AutoSend() {
 		if event.IsDaily && event.Active {
 			if event.MustSend != currentDate {
 				UpdateEvent(event.Name, false)
-			} else if event.SendAt == currentHour && currentMinute == 00 && !event.IsSent {
+			} else if event.SendAt == currentHour && currentMinute == 07 && !event.IsSent {
 				birthdays_list, anniversary_list := CreateBirthdaysSlice()
 				if event.Type == "anniversary" && len(anniversary_list) != 0 {
 					CheckLogsAndSendEmail(event, anniversary_list)
@@ -35,7 +35,6 @@ func AutoSend() {
 		}
 		if !event.IsDaily && event.Active && event.Day == currentDay && event.Month == currentMonth {
 			if event.IsSent {
-				// log.Println("=69734c=", event.Name)
 				UpdateEvent(event.Name, false)
 			} else if !event.IsSent && event.SendAt == currentHour && currentMinute == 00 {
 				log.Println("=72e334=", "Отправлено", event.Name)
