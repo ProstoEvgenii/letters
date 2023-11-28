@@ -35,7 +35,7 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 
 		params := new(models.Dashboard_Params)
 		if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
-			log.Println("=Params schema Error News_=", err)
+			log.Println("=Params schema Error =", err)
 		}
 		_, exists := functions.AuthUsers[params.UUID]
 		if !exists {

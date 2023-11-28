@@ -12,6 +12,7 @@ import (
 
 func AutoSend() {
 	events := GetEvents()
+
 	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
 	today := time.Now()
 	currentDay := int64(today.Day())
@@ -23,7 +24,7 @@ func AutoSend() {
 		if event.IsDaily && event.Active {
 			if event.MustSend != currentDate {
 				UpdateEvent(event.Name, false)
-			} else if event.SendAt == currentHour && currentMinute == 07 && !event.IsSent {
+			} else if event.SendAt == currentHour && currentMinute == 00 && !event.IsSent {
 				birthdays_list, anniversary_list := CreateBirthdaysSlice()
 				if event.Type == "anniversary" && len(anniversary_list) != 0 {
 					CheckLogsAndSendEmail(event, anniversary_list)

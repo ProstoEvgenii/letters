@@ -15,11 +15,9 @@ func main() {
 	if err := godotenv.Load(".env"); err != nil {
 		log.Println("Файл .env не найден")
 		host = ":80"
-
 	}
 
 	db.Connect()
-
 	functions.AutoSend()
 	server.Start(host)
 
