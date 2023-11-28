@@ -32,7 +32,6 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 		rw.Write(settingsAdded)
 	}
 	if request.Method == "GET" {
-
 		params := new(models.Dashboard_Params)
 		if err := schema.NewDecoder().Decode(params, request.URL.Query()); err != nil {
 			log.Println("=Params schema Error =", err)
