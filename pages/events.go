@@ -45,7 +45,6 @@ func UploadEvents(rw http.ResponseWriter, request *http.Request) models.Dashboar
 		return response
 	}
 
-	log.Println("=2f49d7=", eventsData.UUID)
 	_, exists := functions.AuthUsers[eventsData.UUID]
 	if !exists {
 		response.Err = "Ошибка Авторизации"

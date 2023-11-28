@@ -45,7 +45,6 @@ func CreateBirthdaysSlice() ([]models.Users, []models.Users) {
 			}
 		}
 	}
-
 	return birthdays_list, anniversary_list
 }
 
@@ -53,9 +52,7 @@ func GetTemplate(templateName string) string {
 	filter := bson.M{
 		"name": templateName,
 	}
-
 	cursor := db.FindOne(filter, "templates")
-
 	if cursor.Err() != nil {
 		log.Println("=ce7969=", cursor.Err())
 		return ""
@@ -64,7 +61,6 @@ func GetTemplate(templateName string) string {
 	cursor.Decode(&template)
 
 	return template.IndexHTML
-
 }
 
 func SendTest(user models.Users, templateName string) string {
@@ -109,8 +105,6 @@ func CheckLogsAndSendEmail(event models.Events, users []models.Users) string {
 			emailSent += 1
 		}
 	}
-
-	// if
 	if emailSent == 0 {
 		log.Println("=5c58cc=", "Сегодня все поздравлены")
 		return "Сегодня все поздравлены"
@@ -147,13 +141,13 @@ func SendEmail(user models.Users, subject string, html string, settings models.S
 	replacer := strings.NewReplacer("${first_name}", first_name, "${last_name}", last_name, "${email}", user.Email)
 
 	port, err := strconv.Atoi(settings.Port)
+
 	if err != nil {
 		fmt.Println("SendEmail Ошибка форматирования строки в int")
 		return "Ошибка"
 	}
 
 	html = replacer.Replace(html)
-
 	m := gomail.NewMessage()
 	from := m.FormatAddress(settings.EmailLogin, "Глава администрации")
 	m.SetHeader("From", from)
@@ -163,12 +157,13 @@ func SendEmail(user models.Users, subject string, html string, settings models.S
 
 	d := gomail.NewDialer(settings.Smtp, port, settings.EmailLogin, settings.EmailPass)
 	if err := d.DialAndSend(m); err != nil {
-		log.Println("=SendEmail79fc04 Отправка письма=", err)
+		log.Println("=SendEmail Отправка письма=", err)
 		return "Ошибка при отправкe сообщения"
 	}
 	fmt.Printf("Поздравление отправлено:%s\n", user.Email)
 	return "ok"
 }
+
 func CreateLog(user models.Users, eventName string) int64 {
 	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
 	filter := bson.M{
@@ -178,7 +173,6 @@ func CreateLog(user models.Users, eventName string) int64 {
 	}
 	update := bson.M{"$setOnInsert": bson.M{
 		"event":         eventName,
-		
 		"Имя":           user.FirstName,
 		"Фамилия":       user.LastName,
 		"Отчество":      user.MiddleName,

@@ -133,7 +133,7 @@ func uploadSettings(rw http.ResponseWriter, request *http.Request) models.Dashbo
 		response.Err = "Ошибка"
 		return response
 	}
-	log.Println("=bf12b7=", settingsData.UUID)
+	// log.Println("=bf12b7=", settingsData.UUID)
 	_, exists := functions.AuthUsers[settingsData.UUID]
 	if !exists {
 		response.Err = "Ошибка Авторизации."
