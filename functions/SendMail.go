@@ -85,11 +85,6 @@ func SendTest(user models.Users, templateName string) string {
 
 // Пока работает только с днем рождения.
 func CheckLogsAndSendEmail(event models.Events, users []models.Users) string {
-	// birthdays_list, _ := CreateBirthdaysSlice() //Получил выборку пользователей с днем рождения
-	// if len(birthdays_list) == 0 {
-	// 	log.Println("=91c8c4=", "Нет Дней рождений сегодня")
-	// 	return "Нет Дней рождений сегодня"
-	// }
 	html := GetTemplate(event.TemplateName)
 	settings := GetSettings()
 	emailSent := 0
@@ -152,7 +147,8 @@ func SendEmail(user models.Users, subject string, html string, settings models.S
 	m.SetHeader("To", user.Email)
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/html", html)
-
+	log.Println("=5a61c9=", settings.EmailPass)
+	log.Println("=3abd77=",)
 	d := gomail.NewDialer(settings.Smtp, port, settings.EmailLogin, settings.EmailPass)
 	if err := d.DialAndSend(m); err != nil {
 		log.Println("=SendEmail Отправка письма=", err)
