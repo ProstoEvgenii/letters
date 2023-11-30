@@ -59,7 +59,7 @@ func DashboardHandler(rw http.ResponseWriter, request *http.Request) {
 	return
 }
 
-func Dashboard() (int64, int64, int, int64, []string) {
+func Dashboard() (int64, int64, int, int64, []models.Templates) {
 	usersCount := db.CountDocuments(bson.M{}, "users")
 	logsCount := db.CountDocuments(bson.M{}, "logs")
 

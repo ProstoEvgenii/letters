@@ -30,13 +30,13 @@ type Dashboard_Params struct {
 }
 
 type DashboardGetResponse struct {
-	Templates     []string `json:"templates"`
-	UsersCount    int64    `json:"usersCount"`
-	LogsCount     int64    `json:"logsCount"`
-	CountBirtdays int      `json:"countBirtdays"`
-	CountLogs     int64    `json:"todaySent"`
-	SendEmail     string   `json:"sendEmailresult"`
-	SendAutoAt    int      `json:"sendAutoAt"`
+	Templates     []Templates `json:"templates"`
+	UsersCount    int64       `json:"usersCount"`
+	LogsCount     int64       `json:"logsCount"`
+	CountBirtdays int         `json:"countBirtdays"`
+	CountLogs     int64       `json:"todaySent"`
+	SendEmail     string      `json:"sendEmailresult"`
+	SendAutoAt    int         `json:"sendAutoAt"`
 }
 type DashboardPostResponse struct {
 	Err               string `json:"err"`
@@ -53,13 +53,13 @@ type UsersUpload struct {
 
 ////=======Settings
 type SettingsUpload struct {
-	Records    []Events `json:"records"`
-	Templates  []string `json:"templates"`
-	EmailLogin string   `json:"emailLogin" bson:"emailLogin"`
-	EmailPass  string   `json:"emailPass" bson:"emailPass"`
-	Smtp       string   `json:"smtp" bson:"smtp"`
-	Port       string   `json:"port" bson:"port"`
-	UUID       string   `json:"uuid"`
+	Records    []Events    `json:"records"`
+	Templates  []Templates `json:"templates"`
+	EmailLogin string      `json:"emailLogin" bson:"emailLogin"`
+	EmailPass  string      `json:"emailPass" bson:"emailPass"`
+	Smtp       string      `json:"smtp" bson:"smtp"`
+	Port       string      `json:"port" bson:"port"`
+	UUID       string      `json:"uuid"`
 }
 
 ///========DataBase

@@ -40,9 +40,9 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 		if !exists {
 			return
 		}
-		var templatesName_list []string
+		var templates []models.Templates
 		if params.Templates {
-			templatesName_list = GetTemplates()
+			templates = GetTemplates()
 		}
 
 		settings := GetSettings()
@@ -50,7 +50,7 @@ func SettingsHandler(rw http.ResponseWriter, request *http.Request) {
 
 		response := models.SettingsUpload{
 			Records:    events,
-			Templates:  templatesName_list,
+			Templates:  templates,
 			EmailLogin: settings.EmailLogin,
 			Smtp:       settings.Smtp,
 			Port:       settings.Port,
@@ -100,10 +100,10 @@ func CheckConnectionToEmail(settingsData models.SettingsUpload) string {
 	return "Соединение с почтовым ящиком установлено."
 }
 
-func GetTemplates() []string {
+func GetTemplates() []models.Templates {
 	filter := bson.M{}
 
-	var templates []models.TemplatesList
+	var templates []models.Templates
 
 	cursor := db.Find(filter, "templates")
 	if err := cursor.All(context.TODO(), &templates); err != nil {
@@ -113,7 +113,7 @@ func GetTemplates() []string {
 	for _, template := range templates {
 		names = append(names, template.Name)
 	}
-	return names
+	return templates
 }
 
 func uploadSettings(rw http.ResponseWriter, request *http.Request) models.DashboardPostResponse {
