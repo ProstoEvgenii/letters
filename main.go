@@ -3,6 +3,7 @@ package main
 import (
 	"letters/db"
 	"letters/functions"
+	"time"
 
 	"letters/server"
 	"log"
@@ -16,6 +17,7 @@ func main() {
 		log.Println("Файл .env не найден")
 		host = ":80"
 	}
+	log.Println("=1f95ae=", time.Now())
 
 	db.Connect()
 	functions.AutoSend()
