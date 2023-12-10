@@ -94,7 +94,7 @@ func CheckLogsAndSendEmail(event models.Events, users []models.Users) {
 			if result != 0 {
 				//Если результат создания лога == 0 ,значит лог с таким email существует и поздравлять его не нужно
 				err := SendEmail(user, event.Subject, html, settings)
-				CreateLog(user, event.Name, err, false)
+				CreateLog(user, event.Name, err, true)
 				emailsSent += 1
 			}
 		}

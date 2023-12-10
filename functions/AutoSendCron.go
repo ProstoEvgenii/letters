@@ -17,8 +17,7 @@ func init() {
 }
 func AutoSend() {
 	events := GetEvents()
-	unhappenedDailyEvents := make(map[models.Events]bool)
-	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
+
 	today := time.Now()
 	currentDay := int64(today.Day())
 	currentMonth := int64(today.Month())
@@ -39,18 +38,7 @@ func AutoSend() {
 			}
 		}
 	}
-	for activeEvent, isDaily := range activeEvents {
-		if isDaily {
-			// fmt.Printf("%+v", event)
-			if activeEvent.MustSend != currentDate {
-				UpdateEvent(activeEvent.Name, false)
-				unhappenedDailyEvents[activeEvent] = true
-			} else if !activeEvent.IsSent {
-				unhappenedDailyEvents[activeEvent] = true
-			}
-		}
-
-	}
+	unhappenedDailyEvents := getUnhappenedDailyEvents(activeEvents)
 	for event, ok := range unhappenedDailyEvents {
 		if ok && event.SendAt == currentHour && currentMinute == 00 {
 			birthdays_list, anniversary_list := CreateBirthdaysSlice()
@@ -62,14 +50,28 @@ func AutoSend() {
 			UpdateEvent(event.Name, true)
 		}
 	}
-	
-	
 
 	time.AfterFunc(time.Duration(60)*time.Second, func() {
 		AutoSend()
 	})
 }
+func getUnhappenedDailyEvents(activeEvents map[models.Events]bool) map[models.Events]bool {
+	unhappenedDailyEvents := make(map[models.Events]bool)
+	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
+	for activeEvent, isDaily := range activeEvents {
 
+		if isDaily {
+			// fmt.Printf("%+v", event)
+			if activeEvent.MustSend != currentDate {
+				UpdateEvent(activeEvent.Name, false)
+				unhappenedDailyEvents[activeEvent] = true
+			} else if !activeEvent.IsSent {
+				unhappenedDailyEvents[activeEvent] = true
+			}
+		}
+	}
+	return unhappenedDailyEvents
+}
 func GetEvents() []models.Events {
 	filter := bson.M{}
 	cursor := db.Find(filter, "events")
