@@ -17,7 +17,7 @@ func init() {
 }
 func AutoSend() {
 	events := GetEvents()
-
+	unhappenedDailyEvents := make(map[models.Events]bool)
 	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
 	today := time.Now()
 	currentDay := int64(today.Day())
@@ -26,45 +26,44 @@ func AutoSend() {
 	currentMinute := today.Minute()
 
 	for _, event := range events {
-		activeEvents[event] = event.IsDaily
-		// log.Println("=b4b4a6=", activeEvents)
-		if event.IsDaily && event.Active {
-			if event.MustSend != currentDate {
-				UpdateEvent(event.Name, false)
-			} else if event.SendAt == currentHour && currentMinute == 00 && !event.IsSent {
-				birthdays_list, anniversary_list := CreateBirthdaysSlice()
-				if event.Type == "anniversary" && len(anniversary_list) != 0 {
-					CheckLogsAndSendEmail(event, anniversary_list)
-				} else if event.Type == "birthday" && len(birthdays_list) != 0 {
-					CheckLogsAndSendEmail(event, birthdays_list)
-				}
-				UpdateEvent(event.Name, true)
-			}
+		if event.Active {
+			activeEvents[event] = event.IsDaily
 		}
 		if !event.IsDaily && event.Active && event.Day == currentDay && event.Month == currentMonth {
 			if event.IsSent {
 				UpdateEvent(event.Name, false)
 			} else if !event.IsSent && event.SendAt == currentHour && currentMinute == 00 {
 				log.Println("=72e334=", "Отправлено", event.Name)
-				SendToEverybody(event)
+				go SendToEverybody(event)
 				UpdateEvent(event.Name, true)
 			}
 		}
 	}
-
-
-
-
-	
-	// value, ok := activeEvents[true]
-	// if ok {
-	// 	log.Println("=70bbc4=", value)
-	// }
-	for event, isDaily := range activeEvents {
+	for activeEvent, isDaily := range activeEvents {
 		if isDaily {
-			log.Println("=fee52f=", event)
+			// fmt.Printf("%+v", event)
+			if activeEvent.MustSend != currentDate {
+				UpdateEvent(activeEvent.Name, false)
+				unhappenedDailyEvents[activeEvent] = true
+			} else if !activeEvent.IsSent {
+				unhappenedDailyEvents[activeEvent] = true
+			}
+		}
+
+	}
+	for event, ok := range unhappenedDailyEvents {
+		if ok && event.SendAt == currentHour && currentMinute == 00 {
+			birthdays_list, anniversary_list := CreateBirthdaysSlice()
+			if event.Name == "День рождения" {
+				CheckLogsAndSendEmail(event, birthdays_list)
+			} else if event.Name == "Юбилей" {
+				CheckLogsAndSendEmail(event, anniversary_list)
+			}
+			UpdateEvent(event.Name, true)
 		}
 	}
+	
+	
 
 	time.AfterFunc(time.Duration(60)*time.Second, func() {
 		AutoSend()

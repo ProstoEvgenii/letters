@@ -114,8 +114,8 @@ func uploadUsers(w http.ResponseWriter, r *http.Request) {
 			"Дата рождения": dateBirth,
 			"E-mail":        document.Email,
 		}}
-		documentsInserted += db.InsertIfNotExists(filter, update, "users").UpsertedCount
-		documentsModified += db.InsertIfNotExists(filter, update, "users").ModifiedCount
+		documentsInserted += db.InsertIfNotExists(filter, update, "users",true).UpsertedCount
+		documentsModified += db.InsertIfNotExists(filter, update, "users",true).ModifiedCount
 	}
 	if documentsInserted != 0 {
 		objectId, _ := primitive.ObjectIDFromHex("6548eb240fc1b4b7a3800f31")

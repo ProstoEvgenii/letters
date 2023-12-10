@@ -66,12 +66,12 @@ func UploadEvents(rw http.ResponseWriter, request *http.Request) models.Dashboar
 		"active":       eventsData.Active,
 	}}
 
-	settingInserted := db.InsertIfNotExists(filter, update, "events")
+	eventInserted := db.InsertIfNotExists(filter, update, "events",true)
 	result := "ok"
 	response = models.DashboardPostResponse{
 		Err:               result,
-		DocumentsInserted: settingInserted.UpsertedCount,
-		DocumentsModified: settingInserted.ModifiedCount,
+		DocumentsInserted: eventInserted.UpsertedCount,
+		DocumentsModified: eventInserted.ModifiedCount,
 	}
 	return response
 }

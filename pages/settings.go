@@ -158,7 +158,7 @@ func uploadSettings(rw http.ResponseWriter, request *http.Request) models.Dashbo
 		"dateCreate": currentDate,
 	}}
 
-	settingInserted := db.InsertIfNotExists(filter, update, "settings")
+	settingInserted := db.InsertIfNotExists(filter, update, "settings",true)
 
 	response = models.DashboardPostResponse{
 		Err:               result,

@@ -31,8 +31,8 @@ func Connect() {
 	return
 }
 
-func InsertIfNotExists(filter, update primitive.M, collName string) *mongo.UpdateResult {
-	opts := options.Update().SetUpsert(true)
+func InsertIfNotExists(filter, update primitive.M, collName string, insertIfNotExists bool) *mongo.UpdateResult {
+	opts := options.Update().SetUpsert(insertIfNotExists)
 	ctx := context.TODO()
 	result, err := dataBase.Collection(collName).UpdateOne(ctx, filter, update, opts)
 	if err != nil {

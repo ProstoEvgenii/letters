@@ -83,28 +83,26 @@ func SendTest(user models.Users, templateName string) string {
 	return fmt.Sprintf("Пользователь %s поздравлен", user.Email)
 }
 
-// Пока работает только с днем рождения.
-func CheckLogsAndSendEmail(event models.Events, users []models.Users) string {
-	html := GetTemplate(event.TemplateName)
-	settings := GetSettings()
-	emailSent := 0
+func CheckLogsAndSendEmail(event models.Events, users []models.Users) {
+	if len(users) != 0 {
+		var emailsSent int
+		html := GetTemplate(event.TemplateName)
+		settings := GetSettings()
 
-	for _, user := range users {
-		result := CreateLog(user, event.Name)
-		if result != 0 {
-			//Если результат создания лога == 0 ,значит лог с таким email существует и поздравлять его не нужно
-			err := SendEmail(user, event.Subject, html, settings)
-			log.Println("=c44911=", err)
-			emailSent += 1
+		for _, user := range users {
+			result := CreateLog(user, event.Name, "", false)
+			if result != 0 {
+				//Если результат создания лога == 0 ,значит лог с таким email существует и поздравлять его не нужно
+				err := SendEmail(user, event.Subject, html, settings)
+				CreateLog(user, event.Name, err, false)
+				emailsSent += 1
+			}
+		}
+		if emailsSent != 0 {
+			log.Printf("Поздравлено %d пользователей", emailsSent)
 		}
 	}
-	if emailSent == 0 {
-		log.Println("=5c58cc=", "Сегодня все поздравлены")
-		return "Сегодня все поздравлены"
-	} else {
-		log.Printf("Поздравлено %d пользователей", emailSent)
-		return fmt.Sprintf("Поздравлено %d пользователей", emailSent)
-	}
+
 }
 
 func SendToEverybody(event models.Events) {
@@ -120,10 +118,9 @@ func SendToEverybody(event models.Events) {
 	settings := GetSettings()
 	for _, user := range users {
 		if !user.Unsubscribe {
-			CreateLog(user, event.Name)
-			SendEmail(user, event.Subject, html, settings)
+			err := SendEmail(user, event.Subject, html, settings)
+			CreateLog(user, event.Name, err, true)
 		}
-
 	}
 }
 func SendEmail(user models.Users, subject string, html string, settings models.SettingsUpload) string {
@@ -150,13 +147,13 @@ func SendEmail(user models.Users, subject string, html string, settings models.S
 	d := gomail.NewDialer(settings.Smtp, port, settings.EmailLogin, settings.EmailPass)
 	if err := d.DialAndSend(m); err != nil {
 		log.Println("=SendEmail Отправка письма=", err)
-		return "Ошибка при отправкe сообщения"
+		return "Ошибка при отправкe письма"
 	}
 	fmt.Printf("Поздравление отправлено:%s\n", user.Email)
 	return "ok"
 }
 
-func CreateLog(user models.Users, eventName string) int64 {
+func CreateLog(user models.Users, eventName, err string, insertIfNotExists bool) int64 {
 	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
 	filter := bson.M{
 		"event":      eventName,
@@ -171,7 +168,7 @@ func CreateLog(user models.Users, eventName string) int64 {
 		"Дата рождения": user.DateOfBirth,
 		"E-mail":        user.Email,
 		"dateCreate":    currentDate,
+		"status":        err,
 	}}
-	result := db.InsertIfNotExists(filter, update, "logs").UpsertedCount
-	return result
+	return db.InsertIfNotExists(filter, update, "logs", insertIfNotExists).UpsertedCount
 }

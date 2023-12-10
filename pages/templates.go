@@ -62,7 +62,7 @@ func UploadTemplate(rw http.ResponseWriter, request *http.Request) models.Dashbo
 		"indexHTML": indexHTML,
 	}}
 
-	templateInserted := db.InsertIfNotExists(filter, update, "templates")
+	templateInserted := db.InsertIfNotExists(filter, update, "templates", true)
 	result := "ok"
 	response = models.DashboardPostResponse{
 		Err:               result,
