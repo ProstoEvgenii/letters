@@ -10,6 +10,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+var activeEvents map[models.Events]bool
+
+func init() {
+	activeEvents = make(map[models.Events]bool)
+}
 func AutoSend() {
 	events := GetEvents()
 
@@ -21,6 +26,8 @@ func AutoSend() {
 	currentMinute := today.Minute()
 
 	for _, event := range events {
+		activeEvents[event] = event.IsDaily
+		// log.Println("=b4b4a6=", activeEvents)
 		if event.IsDaily && event.Active {
 			if event.MustSend != currentDate {
 				UpdateEvent(event.Name, false)
@@ -42,6 +49,20 @@ func AutoSend() {
 				SendToEverybody(event)
 				UpdateEvent(event.Name, true)
 			}
+		}
+	}
+
+
+
+
+	
+	// value, ok := activeEvents[true]
+	// if ok {
+	// 	log.Println("=70bbc4=", value)
+	// }
+	for event, isDaily := range activeEvents {
+		if isDaily {
+			log.Println("=fee52f=", event)
 		}
 	}
 
