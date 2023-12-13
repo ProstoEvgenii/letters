@@ -87,8 +87,16 @@ func FindSkip(filter primitive.M, collName string, skip, limit int) *mongo.Curso
 
 func FindOne(filter primitive.M, collName string) *mongo.SingleResult {
 	ctx := context.TODO()
+	// var result Restaurant
 	cursor := dataBase.Collection(collName).FindOne(ctx, filter)
 	return cursor
+}
+func FindOneReturnDecoded(filter primitive.M, data interface{}, collName string) {
+	ctx := context.TODO()
+	err := dataBase.Collection(collName).FindOne(ctx, filter).Decode(data)
+	if err != nil {
+		log.Println("=FindOne=", err)
+	}
 }
 
 // func Find(filter, sort bson.M, limit int64, collName string) (*mongo.Cursor, error) {

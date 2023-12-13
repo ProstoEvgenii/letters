@@ -1,8 +1,12 @@
 package models
 
-import "time"
+import (
+	"time"
 
-////=======DashBoard
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+// //=======DashBoard
 type Users struct {
 	FirstName   string    `bson:"Имя"`
 	LastName    string    `bson:"Фамилия"`
@@ -13,12 +17,13 @@ type Users struct {
 }
 
 type Logs struct {
-	FirstName   string    `bson:"Имя"`
-	LastName    string    `bson:"Фамилия"`
-	MiddleName  string    `bson:"Отчество"`
-	DateOfBirth time.Time `bson:"Дата рождения"`
-	Email       string    `bson:"E-mail"`
-	DateCreate  time.Time `bson:"dateCreate"`
+	ID          primitive.ObjectID `bson:"_id,omitempty"`
+	FirstName   string             `bson:"Имя"`
+	LastName    string             `bson:"Фамилия"`
+	MiddleName  string             `bson:"Отчество"`
+	DateOfBirth time.Time          `bson:"Дата рождения"`
+	Email       string             `bson:"E-mail"`
+	DateCreate  time.Time          `bson:"dateCreate"`
 }
 type Dashboard_Params struct {
 	UUID         string `json:"uuid"`
@@ -51,7 +56,7 @@ type UsersUpload struct {
 	Email       string `json:"E-mail" bson:"E-mail"`
 }
 
-////=======Settings
+// //=======Settings
 type SettingsUpload struct {
 	Records    []Events    `json:"records"`
 	Templates  []Templates `json:"templates"`
@@ -62,7 +67,7 @@ type SettingsUpload struct {
 	UUID       string      `json:"uuid"`
 }
 
-///========DataBase
+// /========DataBase
 type GetDataBaseResponse struct {
 	Records    []Users `json:"records"`
 	TotalFound int64   `json:"totalFound"`
@@ -70,7 +75,7 @@ type GetDataBaseResponse struct {
 	PageNumber int     `json:"pageNumber"`
 }
 
-//======History
+// ======History
 type GetHistoryResponse struct {
 	Records            []Logs `json:"records"`
 	LogsCount          int64  `json:"logsCount"`
@@ -80,19 +85,19 @@ type GetHistoryResponse struct {
 	YesterdayLogsCount int64  `json:"yesterdayLogsCount"`
 }
 
-//Auth
+// Auth
 type Auth struct {
 	Login    string `json:"login" bson:"login"`
 	Password string `json:"password" bson:"password"`
 	UUID     string `json:"uuid"`
 }
 
-//Unsubscribe
+// Unsubscribe
 type Unsubscribe struct {
 	Email string `json:"email"`
 }
 
-//Events
+// Events
 type Events struct {
 	Name         string    `json:"name" bson:"name"`
 	IsDaily      bool      `json:"isDaily" bson:"isDaily"`
@@ -109,7 +114,7 @@ type Events struct {
 	UUID         string    `json:"uuid"`
 }
 
-//Templates
+// Templates
 type Templates struct {
 	Name      string `bson:"name" json:"name"`
 	IndexHTML string `bson:"indexHTML" json:"indexHtml"`

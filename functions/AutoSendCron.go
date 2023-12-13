@@ -39,15 +39,18 @@ func AutoSend() {
 		}
 	}
 	unhappenedDailyEvents := getUnhappenedDailyEvents(activeEvents)
+
 	for event, ok := range unhappenedDailyEvents {
-		if ok && event.SendAt == currentHour && currentMinute == 00 {
+		if ok && event.SendAt == currentHour && currentMinute == 03 {
+			log.Println("=a6c252=", event)
 			birthdays_list, anniversary_list := CreateBirthdaysSlice()
 			if event.Name == "День рождения" {
 				CheckLogsAndSendEmail(event, birthdays_list)
+				UpdateEvent(event.Name, true)
 			} else if event.Name == "Юбилей" {
 				CheckLogsAndSendEmail(event, anniversary_list)
+				UpdateEvent(event.Name, true)
 			}
-			UpdateEvent(event.Name, true)
 		}
 	}
 
@@ -55,6 +58,7 @@ func AutoSend() {
 		AutoSend()
 	})
 }
+
 func getUnhappenedDailyEvents(activeEvents map[models.Events]bool) map[models.Events]bool {
 	unhappenedDailyEvents := make(map[models.Events]bool)
 	currentDate := time.Now().UTC().Truncate(24 * time.Hour)

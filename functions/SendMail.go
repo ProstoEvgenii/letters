@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"gopkg.in/gomail.v2"
 )
 
@@ -84,25 +85,25 @@ func SendTest(user models.Users, templateName string) string {
 }
 
 func CheckLogsAndSendEmail(event models.Events, users []models.Users) {
+	currentDate := time.Now().UTC().Truncate(24 * time.Hour)
 	if len(users) != 0 {
-		var emailsSent int
 		html := GetTemplate(event.TemplateName)
 		settings := GetSettings()
-
 		for _, user := range users {
-			result := CreateLog(user, event.Name, "", false)
-			if result != 0 {
-				//Если результат создания лога == 0 ,значит лог с таким email существует и поздравлять его не нужно
+			var res models.Logs
+			filter := bson.M{
+				"event":      event.Name,
+				"E-mail":     user.Email,
+				"dateCreate": currentDate,
+			}
+			db.FindOneReturnDecoded(filter, &res, "logs")
+			log.Println("=ebe16c=", res)
+			if res.ID == primitive.NilObjectID {
 				err := SendEmail(user, event.Subject, html, settings)
 				CreateLog(user, event.Name, err, true)
-				emailsSent += 1
 			}
 		}
-		if emailsSent != 0 {
-			log.Printf("Поздравлено %d пользователей", emailsSent)
-		}
 	}
-
 }
 
 func SendToEverybody(event models.Events) {
@@ -160,7 +161,8 @@ func CreateLog(user models.Users, eventName, err string, insertIfNotExists bool)
 		"E-mail":     user.Email,
 		"dateCreate": currentDate,
 	}
-	update := bson.M{"$setOnInsert": bson.M{
+	log.Println("=d4a859=", filter)
+	update := bson.M{"$set": bson.M{
 		"event":         eventName,
 		"Имя":           user.FirstName,
 		"Фамилия":       user.LastName,
