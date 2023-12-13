@@ -41,7 +41,7 @@ func AutoSend() {
 	unhappenedDailyEvents := getUnhappenedDailyEvents(activeEvents)
 
 	for event, ok := range unhappenedDailyEvents {
-		if ok && event.SendAt == currentHour && currentMinute == 03 {
+		if ok && event.SendAt == currentHour && currentMinute == 00 {
 			log.Println("=a6c252=", event)
 			birthdays_list, anniversary_list := CreateBirthdaysSlice()
 			if event.Name == "День рождения" {
