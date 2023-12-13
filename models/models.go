@@ -23,6 +23,7 @@ type Logs struct {
 	MiddleName  string             `bson:"Отчество"`
 	DateOfBirth time.Time          `bson:"Дата рождения"`
 	Email       string             `bson:"E-mail"`
+	Status      string             `bson:"status"`
 	DateCreate  time.Time          `bson:"dateCreate"`
 }
 type Dashboard_Params struct {
