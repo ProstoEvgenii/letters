@@ -3,6 +3,8 @@ package main
 import (
 	"letters/db"
 	"letters/functions"
+	"mailsener/config"
+	"mailsener/internal/app"
 	"time"
 
 	"letters/server"
@@ -12,6 +14,14 @@ import (
 )
 
 func main() {
+	cfg := config.ParseEnv()
+
+	app.Run(cfg)
+}
+
+func main() {
+
+	//New App
 	host := "127.0.0.1:80"
 	if err := godotenv.Load(".env"); err != nil {
 		log.Println("Файл .env не найден")

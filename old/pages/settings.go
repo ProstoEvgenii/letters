@@ -5,9 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"letters/db"
-	"letters/functions"
-	"letters/models"
+
 	"log"
 	"net/http"
 	"strconv"
@@ -158,7 +156,7 @@ func uploadSettings(rw http.ResponseWriter, request *http.Request) models.Dashbo
 		"dateCreate": currentDate,
 	}}
 
-	settingInserted := db.InsertIfNotExists(filter, update, "settings",true)
+	settingInserted := db.InsertIfNotExists(filter, update, "settings", true)
 
 	response = models.DashboardPostResponse{
 		Err:               result,
