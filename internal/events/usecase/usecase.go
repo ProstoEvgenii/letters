@@ -4,6 +4,7 @@ import (
 	"context"
 	"mailsender/config"
 	"mailsender/internal/entity"
+	"mailsender/internal/events"
 	"mailsender/internal/events/repository"
 )
 
@@ -12,8 +13,8 @@ type eventsUC struct {
 }
 
 // Events UseCase constructor
-func NewEventsUseCase(cfg *config.Config, eventsRepo repository.Events) eventsUC {
-	return eventsUC{eventsRepo: eventsRepo}
+func NewEventsUseCase(cfg *config.Config, eventsRepo repository.Events) events.UseCase {
+	return &eventsUC{eventsRepo: eventsRepo}
 }
 
 // Create event
